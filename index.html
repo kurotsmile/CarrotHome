@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CarrotHome - App Storage</title>
+  <meta name="description" content="CarrotHome is a simple responsive app catalog for storing and displaying app download links." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <div>
+        <p class="eyebrow">CarrotHome</p>
+        <h1>Kho lưu trữ ứng dụng</h1>
+        <p class="subtitle">Hiển thị game, app và các link tải theo từng nền tảng. Giao diện chỉ dùng HTML, CSS media queries và JavaScript đơn giản.</p>
+      </div>
+      <div class="stats-card">
+        <span id="totalApps">0</span>
+        <small>apps</small>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="toolbar" aria-label="Bộ lọc ứng dụng">
+      <input id="searchInput" type="search" placeholder="Tìm app theo tên, id, loại..." />
+      <select id="typeFilter">
+        <option value="all">Tất cả loại</option>
+      </select>
+      <select id="statusFilter">
+        <option value="all">Tất cả trạng thái</option>
+        <option value="publish">Publish</option>
+        <option value="draft">Draft</option>
+      </select>
+    </section>
+
+    <section id="appGrid" class="app-grid" aria-live="polite"></section>
+    <p id="emptyState" class="empty-state" hidden>Không tìm thấy app phù hợp.</p>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">CarrotHome dùng dữ liệu từ <code>apps.json</code>. Mỗi object JSON là một row app.</div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
