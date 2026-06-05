@@ -1,0 +1,26 @@
+name: Deploy to Windows PC
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  pull-code:
+    name: Pull latest code on Windows PC
+    runs-on:
+      - self-hosted
+      - Windows
+      - X64
+
+    steps:
+      - name: Run deploy command from C:\deploy
+        shell: powershell
+        run: |
+          if (!(Test-Path "C:\deploy\deploy.bat")) {
+            throw "Missing deploy command: C:\deploy\deploy.bat"
+          }
+
+          Set-Location "C:\deploy"
+          cmd /c "C:\deploy\deploy.bat"
