@@ -174,43 +174,17 @@ $style_version = file_exists(__DIR__ . '/styles.css') ? filemtime(__DIR__ . '/st
 
     <section class="app-grid" aria-live="polite">
       <?php foreach ($apps as $app): ?>
-        <?php
-          $downloads = active_links($app['download_links'] ?? '');
-          $stores = active_links($app['store_links'] ?? '');
-          $videos = active_links($app['video_links'] ?? '');
-          $cover = first_image($app);
-        ?>
         <article class="app-card">
-          <a class="app-cover" href="app.php?slug=<?= urlencode($app['slug']) ?>" aria-label="Xem <?= h($app['name_en']) ?>">
-            <?php if ($cover): ?>
-              <img src="<?= h($cover) ?>" alt="<?= h($app['name_en']) ?>" loading="lazy" />
+          <a class="app-link" href="app.php?slug=<?= urlencode($app['slug']) ?>" aria-label="Xem <?= h($app['name_en']) ?>">
+            <span class="app-icon">
+            <?php if (!empty($app['icon'])): ?>
+              <img src="<?= h($app['icon']) ?>" alt="<?= h($app['name_en']) ?>" loading="lazy" />
+            <?php else: ?>
+              <span class="app-icon-fallback"><?= h(substr($app['name_en'], 0, 1)) ?></span>
             <?php endif; ?>
+            </span>
+            <h2 class="app-title"><?= h($app['name_en']) ?></h2>
           </a>
-
-          <div class="app-body">
-            <h2 class="app-title">
-              <a href="app.php?slug=<?= urlencode($app['slug']) ?>"><?= h($app['name_en']) ?></a>
-            </h2>
-
-            <div class="app-meta">
-              <span class="badge"><?= h($app['type']) ?></span>
-              <span class="badge"><?= h($app['status']) ?></span>
-            </div>
-
-            <div class="downloads">
-              <?php foreach ($downloads as $key => $url): ?>
-                <a href="<?= h($url) ?>" target="_blank" rel="noopener noreferrer"><?= h(label_name($key)) ?></a>
-              <?php endforeach; ?>
-
-              <?php foreach ($stores as $key => $url): ?>
-                <a href="<?= h($url) ?>" target="_blank" rel="noopener noreferrer"><?= h(label_name($key)) ?></a>
-              <?php endforeach; ?>
-
-              <?php foreach ($videos as $key => $url): ?>
-                <a href="<?= h($url) ?>" target="_blank" rel="noopener noreferrer"><?= h(label_name($key)) ?></a>
-              <?php endforeach; ?>
-            </div>
-          </div>
         </article>
       <?php endforeach; ?>
     </section>
