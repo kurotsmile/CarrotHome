@@ -112,6 +112,8 @@ function label_name($key) {
 
     return $labels[$key] ?? ucwords(str_replace('_', ' ', $key));
 }
+
+$style_version = file_exists(__DIR__ . '/styles.css') ? filemtime(__DIR__ . '/styles.css') : time();
 ?>
 <!doctype html>
 <html lang="vi">
@@ -120,7 +122,7 @@ function label_name($key) {
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>CarrotHome - Kho lưu trữ ứng dụng</title>
   <meta name="description" content="CarrotHome hiển thị danh sách game và ứng dụng từ MySQL database carrot_home." />
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=<?= $style_version ?>" />
 </head>
 <body>
   <header class="site-header">

@@ -1,6 +1,7 @@
 <?php
 $page_title = $page_title ?? 'CarrotHome';
 $page_description = $page_description ?? 'Download apps and games';
+$style_version = file_exists('styles.css') ? filemtime('styles.css') : time();
 ?>
 <!doctype html>
 <html lang="vi">
@@ -9,7 +10,7 @@ $page_description = $page_description ?? 'Download apps and games';
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title><?= h($page_title) ?></title>
 <meta name="description" content="<?= h($page_description) ?>">
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles.css?v=<?= $style_version ?>">
 </head>
 <body>
 <header class="site-header">
