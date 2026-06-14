@@ -41,7 +41,7 @@ try {
     }
 
     if ($search !== '') {
-        $where[] = '(name_en LIKE :search OR `id` LIKE :search OR type LIKE :search)';
+        $where[] = '(id LIKE :search OR `id` LIKE :search OR type LIKE :search)';
         $params[':search'] = '%' . $search . '%';
     }
 
@@ -51,7 +51,7 @@ try {
     $count_stmt->execute($params);
     $total_apps = (int)$count_stmt->fetchColumn();
 
-    $sql = "SELECT id, name_en, type, status, priority, date_create, icon, download_links, store_links, images, video_links
+    $sql = "SELECT id, type, status, priority, date_create, icon, download_links, store_links, images, video_links
             FROM app
             {$where_sql}
             ORDER BY priority DESC, date_create DESC, id DESC
@@ -175,15 +175,15 @@ $style_version = file_exists(__DIR__ . '/styles.css') ? filemtime(__DIR__ . '/st
     <section class="app-grid" aria-live="polite">
       <?php foreach ($apps as $app): ?>
         <article class="app-card">
-          <a class="app-link" href="app.php?id=<?= urlencode($app['id']) ?>" aria-label="Xem <?= h($app['name_en']) ?>">
+          <a class="app-link" href="app.php?id=<?= urlencode($app['id']) ?>" aria-label="Xem <?= h($app['id']) ?>">
             <span class="app-icon">
             <?php if (!empty($app['icon'])): ?>
-              <img src="<?= h($app['icon']) ?>" alt="<?= h($app['name_en']) ?>" loading="lazy" />
+              <img src="<?= h($app['icon']) ?>" alt="<?= h($app['id']) ?>" loading="lazy" />
             <?php else: ?>
-              <span class="app-icon-fallback"><?= h(substr($app['name_en'], 0, 1)) ?></span>
+              <span class="app-icon-fallback"><?= h(substr($app['id'], 0, 1)) ?></span>
             <?php endif; ?>
             </span>
-            <h2 class="app-title"><?= h($app['name_en']) ?></h2>
+            <h2 class="app-title"><?= h($app['id']) ?></h2>
           </a>
         </article>
       <?php endforeach; ?>
