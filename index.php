@@ -41,7 +41,7 @@ try {
     }
 
     if ($search !== '') {
-        $where[] = '(name_en LIKE :search OR app_id LIKE :search OR type LIKE :search)';
+        $where[] = '(name_en LIKE :search OR `id` LIKE :search OR type LIKE :search)';
         $params[':search'] = '%' . $search . '%';
     }
 
@@ -51,7 +51,7 @@ try {
     $count_stmt->execute($params);
     $total_apps = (int)$count_stmt->fetchColumn();
 
-    $sql = "SELECT id, app_id, slug, name_en, type, status, priority, date_create, icon, download_links, store_links, images, video_links
+    $sql = "SELECT id, slug, name_en, type, status, priority, date_create, icon, download_links, store_links, images, video_links
             FROM app
             {$where_sql}
             ORDER BY priority DESC, date_create DESC, id DESC

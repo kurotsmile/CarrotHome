@@ -18,7 +18,7 @@ if (!$slug) {
 
 if ($pdo) {
     try {
-        $stmt = $pdo->prepare("SELECT * FROM apps WHERE slug = :slug AND status != 'trash' LIMIT 1");
+        $stmt = $pdo->prepare("SELECT * FROM app WHERE id = :slug AND status != 'trash' LIMIT 1");
         $stmt->execute([':slug' => $slug]);
         $app = $stmt->fetch();
     } catch (Throwable $e) {
@@ -67,7 +67,7 @@ include 'includes/header.php';
     <div class="app-detail-info">
       <p class="eyebrow"><?= h($app['type'] ?? 'app') ?></p>
       <h2><?= h($app['name_en']) ?></h2>
-      <p class="subtitle">App ID: <?= h($app['app_id'] ?? '') ?></p>
+      <p class="subtitle">App ID: <?= h($app['id'] ?? '') ?></p>
       <div class="app-meta">
         <span class="badge"><?= h($app['status'] ?? '') ?></span>
         <?php if (!empty($app['date_create'])): ?>
