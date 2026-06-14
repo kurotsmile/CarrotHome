@@ -24,7 +24,7 @@ $status = trim($_GET['status'] ?? 'publish');
 try {
     $pdo = new PDO($dsn, $db_user, $db_pass, $options);
 
-    $type_stmt = $pdo->query("SELECT DISTINCT type FROM apps WHERE type IS NOT NULL AND type != '' ORDER BY type ASC");
+    $type_stmt = $pdo->query("SELECT DISTINCT type FROM app WHERE type IS NOT NULL AND type != '' ORDER BY type ASC");
     $types = $type_stmt->fetchAll(PDO::FETCH_COLUMN);
 
     $where = [];
