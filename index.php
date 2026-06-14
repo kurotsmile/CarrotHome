@@ -51,10 +51,10 @@ try {
     $count_stmt->execute($params);
     $total_apps = (int)$count_stmt->fetchColumn();
 
-    $sql = "SELECT id, type, status, priority, date_create, icon, download_links, store_links, images, video_links
+    $sql = "SELECT id, type, status, priority, created_at, icon, download_links, store_links, images, video_links
             FROM app
             {$where_sql}
-            ORDER BY priority DESC, date_create DESC, id DESC
+            ORDER BY priority DESC, created_at DESC, id DESC
             LIMIT 100";
 
     $stmt = $pdo->prepare($sql);
