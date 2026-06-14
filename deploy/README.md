@@ -28,5 +28,6 @@ C:\deploy\deploy.bat
 ## Luu y
 
 - Workflow chi chay tren PC Windows neu self-hosted runner dang online.
-- Script mac dinh dung `git pull --ff-only origin main`. Neu PC co sua code local chua commit, pull co the fail de tranh ghi de code.
+- Script mac dinh fetch `origin/main`, stash thay doi local tren PC neu co, roi reset working tree ve dung commit moi nhat cua remote. Cach nay giup PC Windows tu dong tai file moi khi push code moi, ke ca khi thu muc web co file local/temporary lam `git pull` bi ket.
+- Neu muon tat co che stash local changes, sua `deploy.bat` thanh `-StashLocalChanges:$false`.
 - Neu du an can restart service/web server sau khi pull, them lenh vao cuoi `deploy.bat` hoac `pull-latest.ps1`.

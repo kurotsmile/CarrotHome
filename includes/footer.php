@@ -12,7 +12,7 @@
         <a href="index.php">Trang chủ</a>
         <a href="index.php?type=app">Ứng dụng</a>
         <a href="index.php?type=game">Game</a>
-        <a href="index.php?status=publish">Mới cập nhật</a>
+        <a href="index.php?status=public">Mới cập nhật</a>
       </div>
 
       <div class="footer-column">

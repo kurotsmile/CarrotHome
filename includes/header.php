@@ -1,7 +1,7 @@
 <?php
 $page_title = $page_title ?? 'CarrotHome';
 $page_description = $page_description ?? 'Download apps and games';
-$style_version = file_exists('styles.css') ? filemtime('styles.css') : time();
+$style_version = file_exists(__DIR__ . '/../styles.css') ? filemtime(__DIR__ . '/../styles.css') : time();
 ?>
 <!doctype html>
 <html lang="vi">
@@ -10,16 +10,22 @@ $style_version = file_exists('styles.css') ? filemtime('styles.css') : time();
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title><?= h($page_title) ?></title>
 <meta name="description" content="<?= h($page_description) ?>">
+<link rel="preload" href="fonts/mona-sans.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="styles.css?v=<?= $style_version ?>">
 </head>
 <body>
-<header class="site-header">
-<div class="container header-inner">
-<div>
-<p class="eyebrow">CarrotHome</p>
-<h1><a href="index.php" style="color:inherit;text-decoration:none">CarrotHome</a></h1>
-<p class="subtitle">App & Game Storage Platform</p>
-</div>
-</div>
+<header class="site-nav">
+  <div class="site-nav__wrapper">
+    <a class="site-nav__logo" href="index.php" aria-label="Back to home page">
+      <span class="logo-mark">C</span>
+      <span>CarrotHome</span>
+    </a>
+    <nav class="site-nav-main" aria-label="Primary navigation">
+      <a href="index.php">Explore</a>
+      <a href="index.php?type=app">Applications</a>
+      <a href="index.php?type=game">Games</a>
+      <a href="index.php?status=publish">New</a>
+    </nav>
+  </div>
 </header>
-<main class="container">
+<main class="container page-shell">

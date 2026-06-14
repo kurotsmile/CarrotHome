@@ -46,14 +46,16 @@ if ($error_message) {
     exit;
 }
 
-$page_title = ($app['name_en'] ?? 'App') . ' - CarrotHome';
-$page_description = 'Download ' . ($app['name_en'] ?? 'app') . ' for Android, Windows, macOS, Linux and other platforms.';
+$app_name = $app['id'] ?? 'App';
+$page_title = $app_name . ' - CarrotHome';
+$page_description = 'Download ' . $app_name . ' for Android, Windows, macOS, Linux and other platforms.';
 
-$images = json_array($app['images'] ?? '');
-$downloads = active_links($app['download_links'] ?? '');
-$stores = active_links($app['store_links'] ?? '');
-$videos = active_links($app['video_links'] ?? '');
-$cover = first_image($app);
+$images = [];
+$downloads = app_download_links($app);
+$stores = app_store_links($app);
+$videos = app_video_links($app);
+$other_links = app_other_links($app);
+$cover = asset_url(first_image($app));
 
 include 'includes/header.php';
 ?>
@@ -61,34 +63,40 @@ include 'includes/header.php';
 <section class="app-detail">
   <div class="app-detail-hero">
     <div class="app-detail-icon">
-      <img src="<?= h(app_icon($app['icon'] ?? '')) ?>" alt="<?= h($app['name_en']) ?> icon" loading="lazy">
+      <img src="<?= h(app_icon($app['icon'] ?? '')) ?>" alt="<?= h($app_name) ?> icon" loading="lazy">
     </div>
 
     <div class="app-detail-info">
       <p class="eyebrow"><?= h($app['type'] ?? 'app') ?></p>
-      <h2><?= h($app['name_en']) ?></h2>
-      <p class="subtitle">App ID: <?= h($app['id'] ?? '') ?></p>
+      <h2><?= h($app_name) ?></h2>
+      <p class="subtitle"><?= h($app['category'] ?? '') ?></p>
       <div class="app-meta">
         <span class="badge"><?= h($app['status'] ?? '') ?></span>
-        <?php if (!empty($app['date_create'])): ?>
-          <span class="badge"><?= h($app['date_create']) ?></span>
+        <?php if (!empty($app['created_at'])): ?>
+          <span class="badge"><?= h($app['created_at']) ?></span>
         <?php endif; ?>
       </div>
     </div>
   </div>
 
+  <?php if (!empty($app['decription'])): ?>
+    <div class="app-description">
+      <?= nl2br(h($app['decription'])) ?>
+    </div>
+  <?php endif; ?>
+
   <?php if ($cover): ?>
     <div class="app-main-image">
-      <img src="<?= h($cover) ?>" alt="<?= h($app['name_en']) ?> preview" loading="lazy">
+      <img src="<?= h($cover) ?>" alt="<?= h($app_name) ?> preview" loading="lazy">
     </div>
   <?php endif; ?>
 
   <?php if (count($images)): ?>
     <h3>Ảnh giới thiệu</h3>
     <div class="gallery-grid">
-      <?php foreach ($images as $image_url): ?>
+      <?php foreach (array_values($images) as $image_url): ?>
         <?php if (!empty($image_url)): ?>
-          <img src="<?= h($image_url) ?>" alt="<?= h($app['name_en']) ?> screenshot" loading="lazy">
+          <img src="<?= h(asset_url($image_url)) ?>" alt="<?= h($app_name) ?> screenshot" loading="lazy">
         <?php endif; ?>
       <?php endforeach; ?>
     </div>
@@ -116,6 +124,15 @@ include 'includes/header.php';
     <h3>Video</h3>
     <div class="downloads detail-links">
       <?php foreach ($videos as $key => $url): ?>
+        <a href="<?= h($url) ?>" target="_blank" rel="noopener noreferrer"><?= h(label_name($key)) ?></a>
+      <?php endforeach; ?>
+    </div>
+  <?php endif; ?>
+
+  <?php if (count($other_links)): ?>
+    <h3>Liên kết</h3>
+    <div class="downloads detail-links">
+      <?php foreach ($other_links as $key => $url): ?>
         <a href="<?= h($url) ?>" target="_blank" rel="noopener noreferrer"><?= h(label_name($key)) ?></a>
       <?php endforeach; ?>
     </div>
