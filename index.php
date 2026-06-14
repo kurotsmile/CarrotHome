@@ -47,12 +47,12 @@ try {
 
     $where_sql = count($where) ? 'WHERE ' . implode(' AND ', $where) : '';
 
-    $count_stmt = $pdo->prepare("SELECT COUNT(*) FROM apps {$where_sql}");
+    $count_stmt = $pdo->prepare("SELECT COUNT(*) FROM app {$where_sql}");
     $count_stmt->execute($params);
     $total_apps = (int)$count_stmt->fetchColumn();
 
     $sql = "SELECT id, app_id, slug, name_en, type, status, priority, date_create, icon, download_links, store_links, images, video_links
-            FROM apps
+            FROM app
             {$where_sql}
             ORDER BY priority DESC, date_create DESC, id DESC
             LIMIT 100";
