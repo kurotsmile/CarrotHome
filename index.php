@@ -51,7 +51,7 @@ try {
     $count_stmt->execute($params);
     $total_apps = (int)$count_stmt->fetchColumn();
 
-    $sql = "SELECT id, slug, name_en, type, status, priority, date_create, icon, download_links, store_links, images, video_links
+    $sql = "SELECT id, name_en, type, status, priority, date_create, icon, download_links, store_links, images, video_links
             FROM app
             {$where_sql}
             ORDER BY priority DESC, date_create DESC, id DESC
@@ -175,7 +175,7 @@ $style_version = file_exists(__DIR__ . '/styles.css') ? filemtime(__DIR__ . '/st
     <section class="app-grid" aria-live="polite">
       <?php foreach ($apps as $app): ?>
         <article class="app-card">
-          <a class="app-link" href="app.php?slug=<?= urlencode($app['slug']) ?>" aria-label="Xem <?= h($app['name_en']) ?>">
+          <a class="app-link" href="app.php?id=<?= urlencode($app['id']) ?>" aria-label="Xem <?= h($app['name_en']) ?>">
             <span class="app-icon">
             <?php if (!empty($app['icon'])): ?>
               <img src="<?= h($app['icon']) ?>" alt="<?= h($app['name_en']) ?>" loading="lazy" />
