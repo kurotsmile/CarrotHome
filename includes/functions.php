@@ -9,7 +9,7 @@ function base_url($path = '') {
 }
 
 function app_url($slug) {
-    return base_url('app.php?slug=' . urlencode((string)$slug));
+    return base_url(urlencode((string)$slug));
 }
 
 function page_url($slug, $lang = '') {

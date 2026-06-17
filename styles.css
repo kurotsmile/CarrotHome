@@ -155,10 +155,10 @@ input:focus,select:focus{box-shadow:0 0 0 3px rgba(255,89,0,.16)}
 .download-chip:hover{color:var(--accent);transform:translateY(-1px)}
 
 .shot-details-container{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px;min-height:30px}
-.user-information{display:flex;align-items:center;gap:8px;min-width:0;color:var(--accent)}
+.user-information{display:flex;align-items:center;gap:8px;width:100%;min-width:0;color:var(--accent)}
 .type-icon{flex:0 0 auto;width:20px;height:20px;color:var(--accent)}
 .display-name{min-width:0;color:var(--text);font-size:14px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.badge-link{display:inline-flex;align-items:center;height:18px;padding:0 6px;border-radius:999px;background:#f2f2f3;color:#6e6d7a;font-size:9px;font-weight:900;text-transform:uppercase}
+.badge-link{display:inline-flex;align-items:center;height:18px;margin-left:auto;padding:0 6px;border-radius:999px;background:#f2f2f3;color:#6e6d7a;font-size:9px;font-weight:900;text-transform:uppercase}
 .store-link{color:#6e6d7a;font-size:12px;font-weight:900;text-transform:uppercase}
 .store-link:hover,.badge-link:hover{color:var(--accent)}
 
