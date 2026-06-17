@@ -178,19 +178,23 @@ input:focus,select:focus{box-shadow:0 0 0 3px rgba(255,89,0,.16)}
 .app-detail-hero{display:flex;align-items:center;gap:24px;margin-bottom:30px}
 .app-detail-icon img{display:block;width:128px;height:128px;border-radius:28px;object-fit:cover;box-shadow:var(--shadow)}
 .eyebrow{margin:0 0 8px;color:var(--accent);font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:.08em}
-.app-detail-info h2{font-size:clamp(36px,6vw,72px);line-height:1.03;font-weight:900;letter-spacing:0}
+.app-detail-info h2{font-size:clamp(26px,3.2vw,42px);line-height:1.12;font-weight:900;letter-spacing:0}
 .subtitle{margin-top:8px;color:var(--muted);font-size:16px;line-height:1.55}
 .app-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
 .badge{display:inline-flex;align-items:center;height:28px;padding:0 10px;border-radius:999px;background:#f2f2f3;color:var(--accent);font-size:12px;font-weight:900;text-transform:uppercase}
+.share-button{display:inline-flex;align-items:center;gap:8px;min-height:38px;margin-top:16px;padding:0 14px;border:1px solid var(--line);border-radius:999px;background:#fff;color:var(--text);font:inherit;font-size:13px;font-weight:900;cursor:pointer}
+.share-button svg{display:block;width:18px;height:18px}
+.share-button:hover,.share-button.is-copied{border-color:var(--accent);color:var(--accent)}
 .app-description{margin:20px 0 26px;padding:24px;border:1px solid var(--line);border-radius:8px;background:#fafafa;color:#3d3d4e;font-size:16px;line-height:1.75;white-space:normal}
-.app-main-image{margin:26px 0;padding:14px;border:1px solid var(--line);border-radius:8px;background:#fafafa}
-.app-main-image img{display:block;width:100%;max-height:620px;object-fit:contain}
 .app-detail h3{margin:32px 0 14px;font-size:24px;line-height:1.2}
 .gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
 .gallery-grid img{display:block;width:100%;aspect-ratio:16/10;object-fit:contain;padding:10px;border:1px solid var(--line);border-radius:8px;background:#fafafa}
 .downloads{display:flex;flex-wrap:wrap;gap:10px}
-.downloads a{display:inline-flex;align-items:center;min-height:42px;padding:0 16px;border-radius:999px;background:var(--accent);color:#fff;font-size:14px;font-weight:900}
+.downloads a{display:inline-flex;align-items:center;gap:8px;min-height:42px;padding:0 16px;border-radius:999px;background:var(--accent);color:#fff;font-size:14px;font-weight:900}
+.downloads a svg{display:block;width:18px;height:18px}
 .downloads a:hover{background:var(--accent-dark)}
+.paid-links .paypal-button{background:#003087}
+.paid-links .paypal-button:hover{background:#001c64}
 
 .content-page{max-width:920px;margin:0 auto;padding:8px 0 72px}
 .content-page__header{margin-bottom:28px;text-align:center}
