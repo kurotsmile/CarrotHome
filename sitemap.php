@@ -42,19 +42,9 @@ sitemap_xml_url(sitemap_url(''), '', 'daily', '1.0');
 
 if ($pdo) {
     try {
-        $has_apps_table_stmt = $pdo->query("SHOW TABLES LIKE 'apps'");
-        $use_apps_table = (bool)$has_apps_table_stmt->fetchColumn();
-
-        if ($use_apps_table) {
-            $stmt = $pdo->query("SELECT slug, updated_at, created_at FROM apps WHERE status = 'publish' ORDER BY priority DESC, date_create DESC");
-            foreach ($stmt->fetchAll() as $app) {
-                sitemap_xml_url(sitemap_url(urlencode($app['slug'])), $app['updated_at'] ?: $app['created_at'], 'weekly', '0.8');
-            }
-        } else {
-            $stmt = $pdo->query("SELECT id, created_at FROM app WHERE status != 'trash' ORDER BY priority DESC, created_at DESC");
-            foreach ($stmt->fetchAll() as $app) {
-                sitemap_xml_url(sitemap_url(urlencode($app['id'])), $app['created_at'], 'weekly', '0.8');
-            }
+        $stmt = $pdo->query("SELECT id, created_at FROM app WHERE status != 'trash' ORDER BY priority DESC, created_at DESC");
+        foreach ($stmt->fetchAll() as $app) {
+            sitemap_xml_url(sitemap_url(urlencode($app['id'])), $app['created_at'], 'weekly', '0.8');
         }
 
         $page_stmt = $pdo->query("SELECT slug, updated_at, published_at, created_at FROM page WHERE status = 'public' ORDER BY priority DESC, published_at DESC, created_at DESC");

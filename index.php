@@ -18,16 +18,10 @@ $status = trim($_GET['status'] ?? '');
 
 if ($pdo) {
     try {
-        $has_apps_table_stmt = $pdo->query("SHOW TABLES LIKE 'apps'");
-        $use_apps_table = (bool)$has_apps_table_stmt->fetchColumn();
         $where = [];
         $params = [];
 
-        if ($use_apps_table) {
-            if ($status === '') {
-                $status = 'publish';
-            }
-        } elseif ($status === '') {
+        if ($status === '') {
             $status = 'public';
         }
 
@@ -43,60 +37,24 @@ if ($pdo) {
 
         if ($search !== '') {
             $search_value = '%' . $search . '%';
-            if ($use_apps_table) {
-                $where[] = '(name_en LIKE :search_name OR app_id LIKE :search_app_id OR slug LIKE :search_slug OR type LIKE :search_type OR CAST(category AS CHAR) LIKE :search_category)';
-                $params[':search_name'] = $search_value;
-                $params[':search_app_id'] = $search_value;
-                $params[':search_slug'] = $search_value;
-                $params[':search_type'] = $search_value;
-                $params[':search_category'] = $search_value;
-            } else {
-                $where[] = '(id LIKE :search_id OR decription LIKE :search_description OR category LIKE :search_category OR type LIKE :search_type)';
-                $params[':search_id'] = $search_value;
-                $params[':search_description'] = $search_value;
-                $params[':search_category'] = $search_value;
-                $params[':search_type'] = $search_value;
-            }
+            $where[] = '(id LIKE :search_id OR decription LIKE :search_description)';
+            $params[':search_id'] = $search_value;
+            $params[':search_description'] = $search_value;
         }
 
         $where_sql = count($where) ? 'WHERE ' . implode(' AND ', $where) : '';
 
-        $table_name = $use_apps_table ? 'apps' : 'app';
-        $count_stmt = $pdo->prepare("SELECT COUNT(*) FROM {$table_name} {$where_sql}");
+        $count_stmt = $pdo->prepare("SELECT COUNT(*) FROM app {$where_sql}");
         $count_stmt->execute($params);
         $total_apps = (int)$count_stmt->fetchColumn();
 
-        if ($use_apps_table) {
-            $sql = "SELECT name_en AS id, slug, NULL AS decription, NULL AS github,
-                           JSON_UNQUOTE(JSON_EXTRACT(store_links, '$.microsoft_store')) AS microsoft_store,
-                           icon,
-                           JSON_UNQUOTE(JSON_EXTRACT(store_links, '$.itch')) AS itch,
-                           JSON_UNQUOTE(JSON_EXTRACT(download_links, '$.exe_file')) AS exe_file,
-                           JSON_UNQUOTE(JSON_EXTRACT(download_links, '$.ipa_file')) AS ipa_file,
-                           JSON_UNQUOTE(JSON_EXTRACT(download_links, '$.deb_file')) AS deb_file,
-                           JSON_UNQUOTE(JSON_EXTRACT(store_links, '$.amazon_app_store')) AS amazon_app_store,
-                           JSON_UNQUOTE(JSON_EXTRACT(store_links, '$.huawei_store')) AS huawei_store,
-                           JSON_UNQUOTE(JSON_EXTRACT(video_links, '$.youtube_link')) AS youtube_link,
-                           JSON_UNQUOTE(JSON_EXTRACT(store_links, '$.google_play')) AS google_play,
-                           JSON_UNQUOTE(JSON_EXTRACT(download_links, '$.dmg_file')) AS dmg_file,
-                           JSON_UNQUOTE(JSON_EXTRACT(store_links, '$.uptodown')) AS uptodown,
-                           JSON_UNQUOTE(JSON_EXTRACT(store_links, '$.simmer')) AS simmer,
-                           type,
-                           JSON_UNQUOTE(JSON_EXTRACT(download_links, '$.apk_file')) AS apk_file,
-                           status, NULL AS sync_status, priority, CAST(category AS CHAR) AS category, created_at, icons
-                    FROM apps
-                    {$where_sql}
-                    ORDER BY priority DESC, date_create DESC, name_en ASC
-                    LIMIT 120";
-        } else {
-            $sql = "SELECT id, id AS slug, decription, github, microsoft_store, icon, itch, exe_file, ipa_file, deb_file,
-                           amazon_app_store, huawei_store, youtube_link, google_play, dmg_file, uptodown,
-                           simmer, type, apk_file, status, sync_status, priority, category, created_at
-                    FROM app
-                    {$where_sql}
-                    ORDER BY priority DESC, created_at DESC, id ASC
-                    LIMIT 120";
-        }
+        $sql = "SELECT id, id AS slug, decription, github, microsoft_store, icon, itch, exe_file, ipa_file, deb_file,
+                       amazon_app_store, huawei_store, youtube_link, google_play, dmg_file, uptodown,
+                       simmer, type, apk_file, status, sync_status, priority, category, created_at
+                FROM app
+                {$where_sql}
+                ORDER BY priority DESC, created_at DESC, id ASC
+                LIMIT 120";
 
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
