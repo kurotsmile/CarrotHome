@@ -113,6 +113,17 @@ function short_label($key) {
     return $labels[$key] ?? label_name($key);
 }
 
+function download_icon($key) {
+    $icons = [
+        'apk_file' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7h8a3 3 0 0 1 3 3v4a5 5 0 0 1-5 5h-4a5 5 0 0 1-5-5v-4a3 3 0 0 1 3-3Zm1-4 1.4 2.4M15 3l-1.4 2.4M9 11h.01M15 11h.01" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+        'exe_file' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H4V5Zm6 15h4m-6 0h8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+        'deb_file' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Zm0 9 8-4.5M12 12 4 7.5M12 12v9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+        'dmg_file' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4c-2 1.6-3 3.4-3 5.4 0 1.9 1.1 3.6 3 5.1 1.9-1.5 3-3.2 3-5.1 0-2-1-3.8-3-5.4Zm0 11v5m-3-3h6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+        'ipa_file' => '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h8a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm3 15h2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    ];
+    return $icons[$key] ?? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v10m0 0 4-4m-4 4-4-4M5 20h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+}
+
 function first_active_link($links) {
     foreach ($links as $url) {
         if (!empty($url)) return $url;

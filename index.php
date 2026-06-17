@@ -102,7 +102,10 @@ include __DIR__ . '/includes/header.php';
           <div class="shot-thumbnail-overlay-content">
             <div class="shot-title"><?= h($name) ?></div>
             <?php foreach ($downloads as $key => $url): ?>
-              <a href="<?= h($url) ?>" target="_blank" rel="noopener noreferrer" class="download-chip"><?= h(short_label($key)) ?></a>
+              <a href="<?= h($url) ?>" target="_blank" rel="noopener noreferrer" class="download-chip" aria-label="<?= h(label_name($key)) ?>" title="<?= h(label_name($key)) ?>">
+                <?= download_icon($key) ?>
+                <span><?= h(short_label($key)) ?></span>
+              </a>
             <?php endforeach; ?>
           </div>
         </div>
