@@ -32,6 +32,31 @@ CREATE TABLE IF NOT EXISTS apps (
   FULLTEXT KEY ft_apps_name_appid (name_en, app_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS page (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  slug VARCHAR(180) NOT NULL,
+  lang VARCHAR(12) NOT NULL DEFAULT 'vi',
+  type VARCHAR(80) NOT NULL DEFAULT 'info',
+  title VARCHAR(255) NOT NULL,
+  excerpt TEXT NULL,
+  content_html LONGTEXT NOT NULL,
+  seo_title VARCHAR(255) NULL,
+  seo_description VARCHAR(320) NULL,
+  seo_keywords VARCHAR(500) NULL,
+  status ENUM('public','draft','trash') NOT NULL DEFAULT 'draft',
+  show_footer TINYINT(1) NOT NULL DEFAULT 1,
+  priority INT NOT NULL DEFAULT 0,
+  published_at DATETIME NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_page_slug_lang (slug, lang),
+  KEY idx_page_type_lang_status (type, lang, status),
+  KEY idx_page_footer (show_footer, status, priority),
+  FULLTEXT KEY ft_page_seo (title, excerpt, seo_title, seo_description, seo_keywords)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 INSERT INTO apps (
   app_id,
   slug,

@@ -10,6 +10,12 @@ $style_version = file_exists(__DIR__ . '/../styles.css') ? filemtime(__DIR__ . '
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title><?= h($page_title) ?></title>
 <meta name="description" content="<?= h($page_description) ?>">
+<meta name="theme-color" content="#ff5900">
+<link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
+<link rel="icon" href="favicon/favicon.ico" sizes="any">
+<link rel="manifest" href="favicon/site.webmanifest">
 <link rel="preload" href="fonts/mona-sans.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="styles.css?v=<?= $style_version ?>">
 </head>
@@ -17,8 +23,7 @@ $style_version = file_exists(__DIR__ . '/../styles.css') ? filemtime(__DIR__ . '
 <header class="site-nav">
   <div class="site-nav__wrapper">
     <a class="site-nav__logo" href="index.php" aria-label="Back to home page">
-      <span class="logo-mark">C</span>
-      <span>CarrotHome</span>
+      <img class="brand-logo-img" src="images/carrot_28.png" alt="CarrotHome">
     </a>
     <nav class="site-nav-main" aria-label="Primary navigation">
       <a href="index.php">Explore</a>

@@ -47,7 +47,8 @@ img{max-width:100%}
 }
 
 .site-nav__logo{display:inline-flex;align-items:center;gap:10px;font-size:22px;font-weight:900;letter-spacing:0}
-.logo-mark{display:grid;place-items:center;width:38px;aspect-ratio:1;border-radius:12px;background:var(--accent);color:#fff;font-weight:900}
+.brand-logo-img{display:block;width:auto;height:36px;object-fit:contain}
+.footer-logo .brand-logo-img{height:34px}
 .site-nav-main{display:flex;align-items:center;gap:28px;color:#565564;font-size:15px;font-weight:700}
 .site-nav-main a:hover{color:var(--accent)}
 
@@ -154,6 +155,17 @@ input:focus,select:focus{box-shadow:0 0 0 3px rgba(255,89,0,.16)}
 .downloads{display:flex;flex-wrap:wrap;gap:10px}
 .downloads a{display:inline-flex;align-items:center;min-height:42px;padding:0 16px;border-radius:999px;background:var(--accent);color:#fff;font-size:14px;font-weight:900}
 .downloads a:hover{background:var(--accent-dark)}
+
+.content-page{max-width:920px;margin:0 auto;padding:8px 0 72px}
+.content-page__header{margin-bottom:28px;text-align:center}
+.content-page__header h2{font-size:clamp(36px,6vw,72px);line-height:1.03;font-weight:900;letter-spacing:0}
+.content-page__header p:not(.eyebrow){max-width:680px;margin:12px auto 0;color:var(--muted);font-size:17px;line-height:1.65}
+.content-page__body{color:#303041;font-size:17px;line-height:1.8}
+.content-page__body h1,.content-page__body h2,.content-page__body h3{margin:28px 0 12px;color:var(--text);line-height:1.22}
+.content-page__body p,.content-page__body ul,.content-page__body ol{margin:0 0 18px}
+.content-page__body ul,.content-page__body ol{padding-left:24px;list-style:revert}
+.content-page__body a{color:var(--accent);font-weight:800}
+.content-page__body img{height:auto;border-radius:8px}
 
 .site-footer{margin-top:44px;padding:54px 0 30px;border-top:1px solid var(--line);background:#fafafa;color:#6e6d7a}
 .footer-inner{display:grid;grid-template-columns:minmax(240px,1fr) minmax(0,2fr);gap:48px;align-items:start}
