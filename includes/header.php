@@ -28,7 +28,9 @@ $header_search = trim($_GET['q'] ?? '');
     </a>
     <form class="header-search" method="get" action="index.php" aria-label="Search apps and games">
       <input name="q" type="search" placeholder="Search apps and games" value="<?= h($header_search) ?>">
-      <button class="header-search__button" type="submit" aria-label="Search">Search</button>
+      <button class="header-search__button" type="submit" aria-label="Search">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.3-4.3M19 11a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
     </form>
     <nav class="site-nav-main" aria-label="Primary navigation">
       <a href="index.php">Explore</a>

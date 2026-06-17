@@ -100,7 +100,6 @@ include __DIR__ . '/includes/header.php';
         <a class="shot-thumbnail-link" href="<?= h(app_url($slug)) ?>" aria-label="View <?= h($name) ?>"></a>
         <div class="shot-thumbnail-overlay">
           <div class="shot-thumbnail-overlay-content">
-            <div class="shot-title"><?= h($name) ?></div>
             <?php foreach ($downloads as $key => $url): ?>
               <a href="<?= h($url) ?>" target="_blank" rel="noopener noreferrer" class="download-chip" aria-label="<?= h(label_name($key)) ?>" title="<?= h(label_name($key)) ?>">
                 <?= download_icon($key) ?>
