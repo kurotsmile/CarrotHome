@@ -42,12 +42,21 @@ if ($pdo) {
         }
 
         if ($search !== '') {
+            $search_value = '%' . $search . '%';
             if ($use_apps_table) {
-                $where[] = '(name_en LIKE :search OR app_id LIKE :search OR slug LIKE :search OR type LIKE :search OR CAST(category AS CHAR) LIKE :search)';
+                $where[] = '(name_en LIKE :search_name OR app_id LIKE :search_app_id OR slug LIKE :search_slug OR type LIKE :search_type OR CAST(category AS CHAR) LIKE :search_category)';
+                $params[':search_name'] = $search_value;
+                $params[':search_app_id'] = $search_value;
+                $params[':search_slug'] = $search_value;
+                $params[':search_type'] = $search_value;
+                $params[':search_category'] = $search_value;
             } else {
-                $where[] = '(id LIKE :search OR decription LIKE :search OR category LIKE :search OR type LIKE :search)';
+                $where[] = '(id LIKE :search_id OR decription LIKE :search_description OR category LIKE :search_category OR type LIKE :search_type)';
+                $params[':search_id'] = $search_value;
+                $params[':search_description'] = $search_value;
+                $params[':search_category'] = $search_value;
+                $params[':search_type'] = $search_value;
             }
-            $params[':search'] = '%' . $search . '%';
         }
 
         $where_sql = count($where) ? 'WHERE ' . implode(' AND ', $where) : '';
