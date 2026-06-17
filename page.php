@@ -24,11 +24,15 @@ if ($pdo) {
             FROM page
             WHERE slug = :slug
               AND status = 'public'
-              AND (lang = :lang OR lang = '' OR lang IS NULL)
-            ORDER BY CASE WHEN lang = :lang THEN 0 ELSE 1 END
+              AND (lang = :lang_filter OR lang = '' OR lang IS NULL)
+            ORDER BY CASE WHEN lang = :lang_order THEN 0 ELSE 1 END
             LIMIT 1
         ");
-        $stmt->execute([':slug' => $slug, ':lang' => $page_lang]);
+        $stmt->execute([
+            ':slug' => $slug,
+            ':lang_filter' => $page_lang,
+            ':lang_order' => $page_lang,
+        ]);
         $page = $stmt->fetch();
     } catch (Throwable $e) {
         $error_message = $e->getMessage();
