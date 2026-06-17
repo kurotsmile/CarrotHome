@@ -2,6 +2,7 @@
 $page_title = $page_title ?? 'CarrotHome';
 $page_description = $page_description ?? 'Download apps and games';
 $style_version = file_exists(__DIR__ . '/../styles.css') ? filemtime(__DIR__ . '/../styles.css') : time();
+$header_search = trim($_GET['q'] ?? '');
 ?>
 <!doctype html>
 <html lang="vi">
@@ -25,6 +26,10 @@ $style_version = file_exists(__DIR__ . '/../styles.css') ? filemtime(__DIR__ . '
     <a class="site-nav__logo" href="index.php" aria-label="Back to home page">
       <img class="brand-logo-img" src="images/carrot_28.png" alt="CarrotHome">
     </a>
+    <form class="header-search" method="get" action="index.php" aria-label="Search apps and games">
+      <input name="q" type="search" placeholder="Search apps and games" value="<?= h($header_search) ?>">
+      <button class="header-search__button" type="submit" aria-label="Search">Search</button>
+    </form>
     <nav class="site-nav-main" aria-label="Primary navigation">
       <a href="index.php">Explore</a>
       <a href="index.php?type=app">Applications</a>

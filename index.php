@@ -10,7 +10,6 @@ if (isset($_GET['page'])) {
 
 $apps = [];
 $total_apps = 0;
-$types = [];
 $error_message = $db_error ?? '';
 
 $search = trim($_GET['q'] ?? '');
@@ -19,9 +18,6 @@ $status = trim($_GET['status'] ?? 'public');
 
 if ($pdo) {
     try {
-        $type_stmt = $pdo->query("SELECT DISTINCT type FROM app WHERE type IS NOT NULL AND type != '' ORDER BY type ASC");
-        $types = $type_stmt->fetchAll(PDO::FETCH_COLUMN);
-
         $where = [];
         $params = [];
 
@@ -79,28 +75,6 @@ include __DIR__ . '/includes/header.php';
     Kiểm tra database <code>carrot_home</code> và import file <code>sql/carrot_home.sql</code>.
   </div>
 <?php endif; ?>
-
-<form class="store-toolbar" method="get" action="index.php" aria-label="Bộ lọc ứng dụng">
-  <input name="q" type="search" placeholder="Looking for something special?" value="<?= h($search) ?>">
-
-  <select name="type" aria-label="Type">
-    <option value="all">All types</option>
-    <?php foreach ($types as $item): ?>
-      <option value="<?= h($item) ?>" <?= $type === $item ? 'selected' : '' ?>><?= h(ucfirst($item)) ?></option>
-    <?php endforeach; ?>
-  </select>
-
-  <select name="status" aria-label="Status">
-    <option value="public" <?= $status === 'public' ? 'selected' : '' ?>>Public</option>
-    <option value="draft" <?= $status === 'draft' ? 'selected' : '' ?>>Draft</option>
-    <option value="trash" <?= $status === 'trash' ? 'selected' : '' ?>>Trash</option>
-    <option value="all" <?= $status === 'all' ? 'selected' : '' ?>>All status</option>
-  </select>
-
-  <button class="search-button" type="submit" aria-label="Search">
-    <span>Search</span>
-  </button>
-</form>
 
 <div class="result-line"><?= h($total_apps) ?> apps</div>
 
