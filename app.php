@@ -18,7 +18,33 @@ if (!$slug) {
 
 if ($pdo) {
     try {
-        $stmt = $pdo->prepare("SELECT * FROM app WHERE id = :slug AND status != 'trash' LIMIT 1");
+        $has_apps_table_stmt = $pdo->query("SHOW TABLES LIKE 'apps'");
+        $use_apps_table = (bool)$has_apps_table_stmt->fetchColumn();
+
+        if ($use_apps_table) {
+            $stmt = $pdo->prepare("SELECT name_en AS id, slug, NULL AS decription, NULL AS github,
+                                          JSON_UNQUOTE(JSON_EXTRACT(store_links, '$.microsoft_store')) AS microsoft_store,
+                                          icon, images,
+                                          JSON_UNQUOTE(JSON_EXTRACT(store_links, '$.itch')) AS itch,
+                                          JSON_UNQUOTE(JSON_EXTRACT(download_links, '$.exe_file')) AS exe_file,
+                                          JSON_UNQUOTE(JSON_EXTRACT(download_links, '$.ipa_file')) AS ipa_file,
+                                          JSON_UNQUOTE(JSON_EXTRACT(download_links, '$.deb_file')) AS deb_file,
+                                          JSON_UNQUOTE(JSON_EXTRACT(store_links, '$.amazon_app_store')) AS amazon_app_store,
+                                          JSON_UNQUOTE(JSON_EXTRACT(store_links, '$.huawei_store')) AS huawei_store,
+                                          JSON_UNQUOTE(JSON_EXTRACT(video_links, '$.youtube_link')) AS youtube_link,
+                                          JSON_UNQUOTE(JSON_EXTRACT(store_links, '$.google_play')) AS google_play,
+                                          JSON_UNQUOTE(JSON_EXTRACT(download_links, '$.dmg_file')) AS dmg_file,
+                                          JSON_UNQUOTE(JSON_EXTRACT(store_links, '$.uptodown')) AS uptodown,
+                                          JSON_UNQUOTE(JSON_EXTRACT(store_links, '$.simmer')) AS simmer,
+                                          type,
+                                          JSON_UNQUOTE(JSON_EXTRACT(download_links, '$.apk_file')) AS apk_file,
+                                          status, priority, CAST(category AS CHAR) AS category, created_at
+                                   FROM apps
+                                   WHERE slug = :slug AND status != 'trash'
+                                   LIMIT 1");
+        } else {
+            $stmt = $pdo->prepare("SELECT * FROM app WHERE id = :slug AND status != 'trash' LIMIT 1");
+        }
         $stmt->execute([':slug' => $slug]);
         $app = $stmt->fetch();
     } catch (Throwable $e) {
