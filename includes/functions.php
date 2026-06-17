@@ -13,11 +13,11 @@ function app_url($slug) {
 }
 
 function page_url($slug, $lang = '') {
-    $query = 'slug=' . urlencode((string)$slug);
+    $query = 'page=' . urlencode((string)$slug);
     if ((string)$lang !== '') {
         $query .= '&lang=' . urlencode((string)$lang);
     }
-    return base_url('page.php?' . $query);
+    return base_url('index.php?' . $query);
 }
 
 function app_icon($icon) {
@@ -118,34 +118,6 @@ function first_active_link($links) {
         if (!empty($url)) return $url;
     }
     return '';
-}
-
-function fetch_footer_pages($pdo, $lang = 'vi') {
-    if (!$pdo instanceof PDO) return [];
-
-    try {
-        $stmt = $pdo->prepare("
-            SELECT slug, title, type, lang
-            FROM page
-            WHERE status = 'public'
-              AND show_footer = 1
-              AND (lang = :lang OR lang = '' OR lang IS NULL)
-            ORDER BY type ASC, priority DESC, title ASC
-            LIMIT 60
-        ");
-        $stmt->execute([':lang' => $lang]);
-        $rows = $stmt->fetchAll();
-    } catch (Throwable $e) {
-        return [];
-    }
-
-    $groups = [];
-    foreach ($rows as $row) {
-        $type = trim((string)($row['type'] ?? 'info'));
-        if ($type === '') $type = 'info';
-        $groups[$type][] = $row;
-    }
-    return $groups;
 }
 
 function app_card_icon($app) {

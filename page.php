@@ -2,7 +2,7 @@
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/includes/functions.php';
 
-$slug = trim($_GET['slug'] ?? '');
+$slug = trim($_GET['page'] ?? ($_GET['slug'] ?? ''));
 $page_lang = trim($_GET['lang'] ?? 'vi');
 $page = null;
 $error_message = $db_error ?? '';
@@ -56,7 +56,7 @@ if ($error_message) {
 }
 
 $page_title = ($page['seo_title'] ?: $page['title']) . ' - CarrotHome';
-$page_description = $page['seo_description'] ?: ($page['excerpt'] ?? '');
+$page_description = $page['seo_description'] ?: $page['title'];
 $page_lang = $page['lang'] ?: $page_lang;
 
 include __DIR__ . '/includes/header.php';
@@ -64,11 +64,7 @@ include __DIR__ . '/includes/header.php';
 
 <article class="content-page">
   <header class="content-page__header">
-    <p class="eyebrow"><?= h($page['type'] ?? 'page') ?></p>
     <h2><?= h($page['title']) ?></h2>
-    <?php if (!empty($page['excerpt'])): ?>
-      <p><?= h($page['excerpt']) ?></p>
-    <?php endif; ?>
   </header>
 
   <div class="content-page__body">
