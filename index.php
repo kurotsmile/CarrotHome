@@ -1,12 +1,15 @@
 <?php
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/includes/functions.php';
+require_once __DIR__ . '/includes/visit_tracker.php';
 
 if (isset($_GET['page'])) {
     $_GET['slug'] = trim($_GET['page']);
     include __DIR__ . '/page.php';
     exit;
 }
+
+visit_track_daily_ip($pdo ?? null);
 
 $apps = [];
 $total_apps = 0;

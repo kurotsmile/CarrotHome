@@ -3,6 +3,9 @@ session_start();
 
 require_once 'config/database.php';
 require_once 'includes/functions.php';
+require_once 'includes/visit_tracker.php';
+
+visit_track_daily_ip($pdo ?? null);
 
 $slug = trim($_GET['slug'] ?? '');
 $app = null;
