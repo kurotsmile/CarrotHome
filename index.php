@@ -67,28 +67,28 @@ if ($pdo) {
     }
 }
 
-$page_title = 'CarrotHome - App And Game';
-$page_description = 'Store Carrot style app and game catalog loaded from PHP and MySQL.';
+$page_title = ui_label('meta.home_title', 'CarrotHome - App And Game');
+$page_description = ui_label('meta.home_description', 'Store Carrot style app and game catalog loaded from PHP and MySQL.');
 include __DIR__ . '/includes/header.php';
 ?>
 
 <section class="home-intro">
-  <h2>App And Game</h2>
-  <p>Store Carrot specializes in publishing <strong>games</strong> and <strong>applications</strong> that support learning and working across multiple platforms.</p>
+  <h2><?= h(ui_label('home.heading', 'App And Game')) ?></h2>
+  <p><?= h(ui_label('home.intro', 'Store Carrot specializes in publishing games and applications that support learning and working across multiple platforms.')) ?></p>
 </section>
 
 <?php if ($error_message): ?>
   <div class="empty-state">
-    <strong>Lỗi kết nối MySQL:</strong><br>
+    <strong><?= h(ui_label('error.mysql_connection', 'Lỗi kết nối MySQL:')) ?></strong><br>
     <?= h($error_message) ?><br><br>
-    Kiểm tra database <code>carrot_home</code> và import file <code>sql/carrot_home.sql</code>.
+    <?= h(ui_label('error.database_check', 'Kiểm tra database carrot_home và import file sql/carrot_home.sql.')) ?>
   </div>
 <?php endif; ?>
 
-<div class="result-line"><?= h($total_apps) ?> apps</div>
+<div class="result-line"><?= h($total_apps) ?> <?= h(ui_label('label.apps', 'apps')) ?></div>
 
 <?php if (!$error_message && count($apps) === 0): ?>
-  <p class="empty-state">Không tìm thấy app phù hợp.</p>
+  <p class="empty-state"><?= h(ui_label('empty.no_matching_apps', 'Không tìm thấy app phù hợp.')) ?></p>
 <?php endif; ?>
 
 <ol class="shots-grid">
@@ -106,7 +106,7 @@ include __DIR__ . '/includes/header.php';
         <figure class="shot-thumbnail-placeholder">
           <img src="<?= h($icon) ?>" alt="<?= h($name) ?>" loading="lazy">
         </figure>
-        <a class="shot-thumbnail-link" href="<?= h(app_url($slug)) ?>" aria-label="View <?= h($name) ?>"></a>
+        <a class="shot-thumbnail-link" href="<?= h(app_url($slug)) ?>" aria-label="<?= h(ui_label('aria.view_app', 'View')) ?> <?= h($name) ?>"></a>
         <div class="shot-thumbnail-overlay">
           <div class="shot-thumbnail-overlay-content">
             <?php foreach ($downloads as $key => $url): ?>
@@ -125,7 +125,7 @@ include __DIR__ . '/includes/header.php';
           <a class="badge-link" href="index.php?type=<?= urlencode($app['type'] ?? 'app') ?>"><?= h($app['type'] ?? 'app') ?></a>
         </div>
         <?php if ($primary_store): ?>
-          <a class="store-link" href="<?= h($primary_store) ?>" target="_blank" rel="noopener noreferrer">Store</a>
+          <a class="store-link" href="<?= h($primary_store) ?>" target="_blank" rel="noopener noreferrer"><?= h(ui_label('action.store', 'Store')) ?></a>
         <?php endif; ?>
       </div>
     </li>

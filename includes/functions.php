@@ -3,6 +3,54 @@ function h($value) {
     return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
 }
 
+function current_lang_key() {
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+
+    return trim((string)($_SESSION['key_lang'] ?? 'vi')) ?: 'vi';
+}
+
+function ui_label($key, $default, $lang_key = null) {
+    static $cache = [];
+
+    $key = trim((string)$key);
+    $default = (string)$default;
+    $lang_key = trim((string)($lang_key ?? current_lang_key())) ?: 'vi';
+
+    if ($key === '') {
+        return $default;
+    }
+
+    $cache_key = $lang_key . "\n" . $key;
+    if (array_key_exists($cache_key, $cache)) {
+        return $cache[$cache_key];
+    }
+
+    $cache[$cache_key] = $default;
+
+    if (!isset($GLOBALS['pdo']) || !$GLOBALS['pdo'] instanceof PDO) {
+        return $cache[$cache_key];
+    }
+
+    try {
+        $stmt = $GLOBALS['pdo']->prepare('SELECT value FROM text_label WHERE `key` = :label_key AND lang_key = :lang_key LIMIT 1');
+        $stmt->execute([
+            ':label_key' => $key,
+            ':lang_key' => $lang_key,
+        ]);
+        $value = $stmt->fetchColumn();
+
+        if ($value !== false && trim((string)$value) !== '') {
+            $cache[$cache_key] = (string)$value;
+        }
+    } catch (Throwable $e) {
+        $cache[$cache_key] = $default;
+    }
+
+    return $cache[$cache_key];
+}
+
 function base_url($path = '') {
     $path = ltrim((string)$path, '/');
     return '/' . $path;
@@ -92,21 +140,25 @@ function active_column_links($app, $keys) {
 
 function label_name($key) {
     $labels = [
-        'apk_file' => 'APK',
-        'exe_file' => 'Windows',
-        'deb_file' => 'Linux DEB',
-        'dmg_file' => 'macOS',
-        'ipa_file' => 'iOS',
-        'google_play' => 'Google Play',
-        'amazon_app_store' => 'Amazon',
-        'microsoft_store' => 'Microsoft',
-        'itch' => 'Itch.io',
-        'uptodown' => 'Uptodown',
-        'huawei_store' => 'Huawei',
-        'simmer' => 'Simmer',
-        'youtube_link' => 'YouTube',
+        'apk_file' => ['download.apk', 'APK'],
+        'exe_file' => ['download.windows', 'Windows'],
+        'deb_file' => ['download.linux_deb', 'Linux DEB'],
+        'dmg_file' => ['download.macos', 'macOS'],
+        'ipa_file' => ['download.ios', 'iOS'],
+        'google_play' => ['store.google_play', 'Google Play'],
+        'amazon_app_store' => ['store.amazon', 'Amazon'],
+        'microsoft_store' => ['store.microsoft', 'Microsoft'],
+        'itch' => ['store.itch', 'Itch.io'],
+        'uptodown' => ['store.uptodown', 'Uptodown'],
+        'huawei_store' => ['store.huawei', 'Huawei'],
+        'simmer' => ['store.simmer', 'Simmer'],
+        'youtube_link' => ['store.youtube', 'YouTube'],
     ];
-    return $labels[$key] ?? ucwords(str_replace('_', ' ', (string)$key));
+    if (isset($labels[$key])) {
+        return ui_label($labels[$key][0], $labels[$key][1]);
+    }
+
+    return ui_label('label.' . preg_replace('/[^a-z0-9._-]+/', '_', (string)$key), ucwords(str_replace('_', ' ', (string)$key)));
 }
 
 function short_label($key) {

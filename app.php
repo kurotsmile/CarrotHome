@@ -14,10 +14,10 @@ $paypal_config = file_exists(__DIR__ . '/config/paypal.php') ? require __DIR__ .
 
 if (!$slug) {
     http_response_code(404);
-    $page_title = 'App not found - CarrotHome';
-    $page_description = 'The requested app was not found.';
+    $page_title = ui_label('meta.app_not_found_title', 'App not found - CarrotHome');
+    $page_description = ui_label('meta.app_not_found_description', 'The requested app was not found.');
     include 'includes/header.php';
-    echo '<div class="empty-state"><strong>Không tìm thấy app.</strong><br>Thiếu tham số <code>slug</code>.</div>';
+    echo '<div class="empty-state"><strong>' . h(ui_label('error.app_not_found', 'Không tìm thấy app.')) . '</strong><br>' . h(ui_label('error.missing_slug', 'Thiếu tham số slug.')) . '</div>';
     include 'includes/footer.php';
     exit;
 }
@@ -34,20 +34,20 @@ if ($pdo) {
 
 if (!$app && !$error_message) {
     http_response_code(404);
-    $page_title = 'App not found - CarrotHome';
-    $page_description = 'The requested app was not found.';
+    $page_title = ui_label('meta.app_not_found_title', 'App not found - CarrotHome');
+    $page_description = ui_label('meta.app_not_found_description', 'The requested app was not found.');
     include 'includes/header.php';
-    echo '<div class="empty-state"><strong>Không tìm thấy app:</strong><br>' . h($slug) . '</div>';
+    echo '<div class="empty-state"><strong>' . h(ui_label('error.app_not_found_colon', 'Không tìm thấy app:')) . '</strong><br>' . h($slug) . '</div>';
     include 'includes/footer.php';
     exit;
 }
 
 if ($error_message) {
     http_response_code(500);
-    $page_title = 'Database error - CarrotHome';
-    $page_description = 'Database connection error.';
+    $page_title = ui_label('meta.database_error_title', 'Database error - CarrotHome');
+    $page_description = ui_label('meta.database_error_description', 'Database connection error.');
     include 'includes/header.php';
-    echo '<div class="empty-state"><strong>Lỗi MySQL:</strong><br>' . h($error_message) . '</div>';
+    echo '<div class="empty-state"><strong>' . h(ui_label('error.mysql', 'Lỗi MySQL:')) . '</strong><br>' . h($error_message) . '</div>';
     include 'includes/footer.php';
     exit;
 }
@@ -85,7 +85,7 @@ include 'includes/header.php';
       </div>
       <button class="share-button" type="button" data-share-url="<?= h($share_url) ?>" data-share-title="<?= h($app_name) ?>">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 8a3 3 0 1 0-2.8-4M8 12l8-4M8 12l8 4M8 12a3 3 0 1 1-3-3 3 3 0 0 1 3 3Zm11 7a3 3 0 1 1-3-3 3 3 0 0 1 3 3Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <span>Share</span>
+        <span><?= h(ui_label('action.share', 'Share')) ?></span>
       </button>
     </div>
   </div>
@@ -97,7 +97,7 @@ include 'includes/header.php';
   <?php endif; ?>
 
   <?php if (count($images)): ?>
-    <h3>Ảnh giới thiệu</h3>
+    <h3><?= h(ui_label('section.screenshots', 'Ảnh giới thiệu')) ?></h3>
     <div class="gallery-grid">
       <?php foreach (array_values($images) as $image_url): ?>
         <?php if (!empty($image_url)): ?>
@@ -108,7 +108,7 @@ include 'includes/header.php';
   <?php endif; ?>
 
   <?php if (count($downloads)): ?>
-    <h3>Tải xuống</h3>
+    <h3><?= h(ui_label('section.downloads', 'Tải xuống')) ?></h3>
     <div class="downloads detail-links">
       <?php foreach ($downloads as $key => $url): ?>
         <a href="<?= h($url) ?>" target="_blank" rel="noopener noreferrer">
@@ -120,7 +120,7 @@ include 'includes/header.php';
   <?php endif; ?>
 
   <?php if (count($stores)): ?>
-    <h3>Cửa hàng</h3>
+    <h3><?= h(ui_label('section.stores', 'Cửa hàng')) ?></h3>
     <div class="downloads detail-links">
       <?php foreach ($stores as $key => $url): ?>
         <a href="<?= h($url) ?>" target="_blank" rel="noopener noreferrer">

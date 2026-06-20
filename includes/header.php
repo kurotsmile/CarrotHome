@@ -52,20 +52,20 @@ $current_language_label = $current_country['lang_country'] ?? ($current_key_lang
 <body>
 <header class="site-nav">
   <div class="site-nav__wrapper">
-    <a class="site-nav__logo" href="index.php" aria-label="Back to home page">
+    <a class="site-nav__logo" href="index.php" aria-label="<?= h(ui_label('aria.back_home', 'Back to home page')) ?>">
       <img class="brand-logo-img" src="images/carrot_28.png" alt="CarrotHome">
     </a>
-    <form class="header-search" method="get" action="index.php" aria-label="Search apps and games">
-      <input name="q" type="search" placeholder="Search apps and games" value="<?= h($header_search) ?>">
-      <button class="header-search__button" type="submit" aria-label="Search">
+    <form class="header-search" method="get" action="index.php" aria-label="<?= h(ui_label('aria.search_apps_games', 'Search apps and games')) ?>">
+      <input name="q" type="search" placeholder="<?= h(ui_label('search.placeholder', 'Search apps and games')) ?>" value="<?= h($header_search) ?>">
+      <button class="header-search__button" type="submit" aria-label="<?= h(ui_label('action.search', 'Search')) ?>">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.3-4.3M19 11a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </button>
     </form>
-    <nav class="site-nav-main" aria-label="Primary navigation">
-      <a href="index.php">Explore</a>
-      <a href="index.php?type=app">Applications</a>
-      <a href="index.php?type=game">Games</a>
-      <a href="index.php?status=publish">New</a>
+    <nav class="site-nav-main" aria-label="<?= h(ui_label('aria.primary_navigation', 'Primary navigation')) ?>">
+      <a href="index.php"><?= h(ui_label('nav.explore', 'Explore')) ?></a>
+      <a href="index.php?type=app"><?= h(ui_label('nav.applications', 'Applications')) ?></a>
+      <a href="index.php?type=game"><?= h(ui_label('nav.games', 'Games')) ?></a>
+      <a href="index.php?status=publish"><?= h(ui_label('nav.new', 'New')) ?></a>
       <?php if (count($header_countries) > 0): ?>
         <div class="language-menu">
           <button class="language-menu__trigger" type="button" aria-expanded="false" aria-haspopup="true">
