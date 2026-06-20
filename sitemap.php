@@ -47,9 +47,9 @@ if ($pdo) {
             sitemap_xml_url(sitemap_url(urlencode($app['id'])), $app['created_at'], 'weekly', '0.8');
         }
 
-        $page_stmt = $pdo->query("SELECT slug, updated_at, published_at, created_at FROM page WHERE status = 'public' ORDER BY priority DESC, published_at DESC, created_at DESC");
+        $page_stmt = $pdo->query("SELECT slug, lang, updated_at, published_at, created_at FROM page WHERE status = 'public' ORDER BY priority DESC, published_at DESC, created_at DESC");
         foreach ($page_stmt->fetchAll() as $page) {
-            sitemap_xml_url(sitemap_url('index.php?page=' . urlencode($page['slug'])), $page['updated_at'] ?: ($page['published_at'] ?: $page['created_at']), 'monthly', '0.6');
+            sitemap_xml_url(sitemap_site_url() . page_url($page['slug'], trim((string)($page['lang'] ?? ''))), $page['updated_at'] ?: ($page['published_at'] ?: $page['created_at']), 'monthly', '0.6');
         }
     } catch (Throwable $e) {
     }

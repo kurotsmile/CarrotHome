@@ -267,7 +267,7 @@ input:focus,select:focus{box-shadow:0 0 0 3px rgba(255,89,0,.16)}
 
 .content-page{max-width:1080px;margin:0 auto;padding:8px 0 72px}
 .content-page__header{margin-bottom:28px;text-align:center}
-.content-page__header h2{font-size:clamp(36px,6vw,72px);line-height:1.03;font-weight:900;letter-spacing:0}
+.content-page__header h2{font-size:clamp(24px,2.8vw,36px);line-height:1.12;font-weight:900;letter-spacing:0}
 .content-page__header p:not(.eyebrow){max-width:680px;margin:12px auto 0;color:var(--muted);font-size:17px;line-height:1.65}
 .content-page__body{color:#303041;font-size:17px;line-height:1.8}
 .content-page__body h1,.content-page__body h2,.content-page__body h3{margin:28px 0 12px;color:var(--text);line-height:1.22}
