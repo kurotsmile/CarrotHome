@@ -28,7 +28,6 @@ $footer_page_columns = [
         <a href="index.php"><?= h(ui_label('nav.home', 'Home')) ?></a>
         <a href="index.php?type=app"><?= h(ui_label('nav.applications', 'Applications')) ?></a>
         <a href="index.php?type=game"><?= h(ui_label('nav.game', 'Game')) ?></a>
-        <a href="index.php?status=public"><?= h(ui_label('nav.latest', 'Latest')) ?></a>
       </div>
 
       <?php foreach ($footer_page_columns as $column_key => $links): ?>

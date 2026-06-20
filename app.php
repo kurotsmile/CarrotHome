@@ -83,79 +83,88 @@ include 'includes/header.php';
           <span class="badge"><?= h($app['created_at']) ?></span>
         <?php endif; ?>
       </div>
-      <button class="share-button" type="button" data-share-url="<?= h($share_url) ?>" data-share-title="<?= h($app_name) ?>">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 8a3 3 0 1 0-2.8-4M8 12l8-4M8 12l8 4M8 12a3 3 0 1 1-3-3 3 3 0 0 1 3 3Zm11 7a3 3 0 1 1-3-3 3 3 0 0 1 3 3Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <span><?= h(ui_label('action.share', 'Share')) ?></span>
-      </button>
+      <div class="app-hero-actions">
+        <button class="share-button" type="button" data-share-url="<?= h($share_url) ?>" data-share-title="<?= h($app_name) ?>">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 8a3 3 0 1 0-2.8-4M8 12l8-4M8 12l8 4M8 12a3 3 0 1 1-3-3 3 3 0 0 1 3 3Zm11 7a3 3 0 1 1-3-3 3 3 0 0 1 3 3Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span><?= h(ui_label('action.share', 'Share')) ?></span>
+        </button>
+        <?php foreach ($stores as $key => $url): ?>
+          <a class="store-action" href="<?= h($url) ?>" target="_blank" rel="noopener noreferrer">
+            <?= store_icon($key) ?>
+            <span><?= h(label_name($key)) ?></span>
+          </a>
+        <?php endforeach; ?>
+      </div>
     </div>
   </div>
 
-  <?php if (!empty($app['decription'])): ?>
-    <div class="app-description">
-      <?= nl2br(h($app['decription'])) ?>
-    </div>
-  <?php endif; ?>
+  <div class="app-detail-layout">
+    <div class="app-detail-content">
+      <?php if (!empty($app['decription'])): ?>
+        <div class="app-description">
+          <?= nl2br(h($app['decription'])) ?>
+        </div>
+      <?php endif; ?>
 
-  <?php if (count($images)): ?>
-    <h3><?= h(ui_label('section.screenshots', 'Ảnh giới thiệu')) ?></h3>
-    <div class="gallery-grid">
-      <?php foreach (array_values($images) as $image_url): ?>
-        <?php if (!empty($image_url)): ?>
-          <img src="<?= h(asset_url($image_url)) ?>" alt="<?= h($app_name) ?> screenshot" loading="lazy">
-        <?php endif; ?>
-      <?php endforeach; ?>
-    </div>
-  <?php endif; ?>
+      <?php if (count($images)): ?>
+        <h3><?= h(ui_label('section.screenshots', 'Ảnh giới thiệu')) ?></h3>
+        <div class="gallery-grid">
+          <?php foreach (array_values($images) as $image_url): ?>
+            <?php if (!empty($image_url)): ?>
+              <img src="<?= h(asset_url($image_url)) ?>" alt="<?= h($app_name) ?> screenshot" loading="lazy">
+            <?php endif; ?>
+          <?php endforeach; ?>
+        </div>
+      <?php endif; ?>
 
-  <?php if (count($downloads)): ?>
-    <h3><?= h(ui_label('section.downloads', 'Tải xuống')) ?></h3>
-    <div class="downloads detail-links">
-      <?php foreach ($downloads as $key => $url): ?>
-        <a href="<?= h($url) ?>" target="_blank" rel="noopener noreferrer">
-          <?= download_icon($key) ?>
-          <span><?= h(label_name($key)) ?></span>
-        </a>
-      <?php endforeach; ?>
-    </div>
-  <?php endif; ?>
-
-  <?php if (count($stores)): ?>
-    <h3><?= h(ui_label('section.stores', 'Cửa hàng')) ?></h3>
-    <div class="downloads detail-links">
-      <?php foreach ($stores as $key => $url): ?>
-        <a href="<?= h($url) ?>" target="_blank" rel="noopener noreferrer">
-          <?= store_icon($key) ?>
-          <span><?= h(label_name($key)) ?></span>
-        </a>
-      <?php endforeach; ?>
-    </div>
-  <?php endif; ?>
-
-  <?php if (count($videos)): ?>
-    <h3>Video</h3>
-    <div class="downloads detail-links">
-      <?php foreach ($videos as $key => $url): ?>
-        <a href="<?= h($url) ?>" target="_blank" rel="noopener noreferrer"><?= h(label_name($key)) ?></a>
-      <?php endforeach; ?>
-    </div>
-  <?php endif; ?>
-
-  <?php if ($github_url): ?>
-    <h3>GitHub</h3>
-    <div class="downloads detail-links paid-links">
-      <?php if ($has_paid_github): ?>
-        <a href="<?= h($github_url) ?>" target="_blank" rel="noopener noreferrer">
-          <?= store_icon('github') ?>
-          <span>GitHub</span>
-        </a>
-      <?php elseif (!empty($paypal_config['enabled'])): ?>
-        <a class="paypal-button" href="<?= h(base_url('paypal-create.php?slug=' . urlencode($app_name))) ?>">
-          <?= store_icon('paypal') ?>
-          <span>PayPal <?= h($paypal_config['amount'] ?? '') ?> <?= h($paypal_config['currency'] ?? '') ?></span>
-        </a>
+      <?php if (count($videos)): ?>
+        <h3>Video</h3>
+        <div class="downloads detail-links">
+          <?php foreach ($videos as $key => $url): ?>
+            <a href="<?= h($url) ?>" target="_blank" rel="noopener noreferrer"><?= h(label_name($key)) ?></a>
+          <?php endforeach; ?>
+        </div>
       <?php endif; ?>
     </div>
-  <?php endif; ?>
+
+    <?php if (count($downloads) || $github_url): ?>
+      <aside class="app-detail-sidebar" aria-label="<?= h(ui_label('aria.app_links', 'App links')) ?>">
+        <?php if (count($downloads)): ?>
+          <div class="sidebar-panel download-panel">
+            <h3><?= h(ui_label('section.downloads', 'Tải xuống')) ?></h3>
+            <div class="sidebar-links">
+              <?php foreach ($downloads as $key => $url): ?>
+                <a href="<?= h($url) ?>" target="_blank" rel="noopener noreferrer">
+                  <?= download_icon($key) ?>
+                  <span><?= h(label_name($key)) ?></span>
+                </a>
+              <?php endforeach; ?>
+            </div>
+          </div>
+        <?php endif; ?>
+
+        <?php if ($github_url): ?>
+          <div class="source-promo">
+            <div class="source-promo__icon"><?= store_icon('github') ?></div>
+            <p class="source-promo__label"><?= h(ui_label('source.code_label', 'Mã nguồn GitHub')) ?></p>
+            <h3><?= h(ui_label('source.code_title', 'Mua source để tùy biến nhanh hơn')) ?></h3>
+            <p><?= h(ui_label('source.code_description', 'Sở hữu liên kết mã nguồn, triển khai phiên bản riêng và tiết kiệm thời gian phát triển sản phẩm.')) ?></p>
+            <?php if ($has_paid_github): ?>
+              <a class="source-promo__button" href="<?= h($github_url) ?>" target="_blank" rel="noopener noreferrer">
+                <?= store_icon('github') ?>
+                <span>GitHub</span>
+              </a>
+            <?php elseif (!empty($paypal_config['enabled'])): ?>
+              <a class="source-promo__button source-promo__button--paypal" href="<?= h(base_url('paypal-create.php?slug=' . urlencode($app_name))) ?>">
+                <?= store_icon('paypal') ?>
+                <span><?= h(ui_label('action.buy_source', 'Mua mã nguồn')) ?> <?= h($paypal_config['amount'] ?? '') ?> <?= h($paypal_config['currency'] ?? '') ?></span>
+              </a>
+            <?php endif; ?>
+          </div>
+        <?php endif; ?>
+      </aside>
+    <?php endif; ?>
+  </div>
 </section>
 
 <script>

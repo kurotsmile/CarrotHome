@@ -65,7 +65,6 @@ $current_language_label = $current_country['lang_country'] ?? ($current_key_lang
       <a href="index.php"><?= h(ui_label('nav.explore', 'Explore')) ?></a>
       <a href="index.php?type=app"><?= h(ui_label('nav.applications', 'Applications')) ?></a>
       <a href="index.php?type=game"><?= h(ui_label('nav.games', 'Games')) ?></a>
-      <a href="index.php?status=publish"><?= h(ui_label('nav.new', 'New')) ?></a>
       <?php if (count($header_countries) > 0): ?>
         <div class="language-menu">
           <button class="language-menu__trigger" type="button" aria-expanded="false" aria-haspopup="true">
