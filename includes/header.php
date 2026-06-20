@@ -1,11 +1,40 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 $page_title = $page_title ?? 'CarrotHome';
 $page_description = $page_description ?? 'Download apps and games';
 $style_version = file_exists(__DIR__ . '/../styles.css') ? filemtime(__DIR__ . '/../styles.css') : time();
 $header_search = trim($_GET['q'] ?? '');
+$header_countries = [];
+$current_key_lang = trim((string)($_SESSION['key_lang'] ?? ''));
+$current_country = null;
+
+if (isset($pdo) && $pdo instanceof PDO) {
+    try {
+        $country_stmt = $pdo->query("SELECT id, icon, name, lang_key, lang_country FROM country ORDER BY name ASC");
+        $header_countries = $country_stmt->fetchAll();
+    } catch (Throwable $e) {
+        $header_countries = [];
+    }
+}
+
+foreach ($header_countries as $country) {
+    if ($current_key_lang !== '' && $country['lang_key'] === $current_key_lang) {
+        $current_country = $country;
+        break;
+    }
+}
+
+if (!$current_country && count($header_countries) > 0) {
+    $current_country = $header_countries[0];
+}
+
+$current_language_label = $current_country['lang_country'] ?? ($current_key_lang ?: 'Language');
 ?>
 <!doctype html>
-<html lang="vi">
+<html lang="<?= h($current_key_lang ?: 'vi') ?>">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -37,7 +66,75 @@ $header_search = trim($_GET['q'] ?? '');
       <a href="index.php?type=app">Applications</a>
       <a href="index.php?type=game">Games</a>
       <a href="index.php?status=publish">New</a>
+      <?php if (count($header_countries) > 0): ?>
+        <div class="language-menu">
+          <button class="language-menu__trigger" type="button" aria-expanded="false" aria-haspopup="true">
+            <span class="language-menu__icon"><?= country_icon_html($current_country['icon'] ?? '') ?></span>
+            <span><?= h(strtoupper($current_language_label)) ?></span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="language-menu__panel" role="menu">
+            <?php foreach ($header_countries as $country): ?>
+              <?php $is_active = $current_key_lang !== '' && $country['lang_key'] === $current_key_lang; ?>
+              <button
+                class="language-menu__item<?= $is_active ? ' is-active' : '' ?>"
+                type="button"
+                role="menuitem"
+                data-lang-key="<?= h($country['lang_key']) ?>"
+              >
+                <span class="language-menu__flag"><?= country_icon_html($country['icon'] ?? '') ?></span>
+                <span class="language-menu__name"><?= h($country['name']) ?></span>
+                <span class="language-menu__code"><?= h(strtoupper($country['lang_country'])) ?></span>
+              </button>
+            <?php endforeach; ?>
+          </div>
+        </div>
+      <?php endif; ?>
     </nav>
   </div>
 </header>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var menu = document.querySelector('.language-menu');
+  if (!menu) return;
+
+  var trigger = menu.querySelector('.language-menu__trigger');
+  var items = menu.querySelectorAll('.language-menu__item');
+
+  trigger.addEventListener('click', function () {
+    var isOpen = menu.classList.toggle('is-open');
+    trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  });
+
+  document.addEventListener('click', function (event) {
+    if (menu.contains(event.target)) return;
+    menu.classList.remove('is-open');
+    trigger.setAttribute('aria-expanded', 'false');
+  });
+
+  items.forEach(function (item) {
+    item.addEventListener('click', function () {
+      var langKey = item.getAttribute('data-lang-key');
+      if (!langKey) return;
+
+      item.disabled = true;
+      fetch('<?= h(base_url('language.php')) ?>', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
+        body: 'lang_key=' + encodeURIComponent(langKey)
+      })
+        .then(function (response) { return response.json(); })
+        .then(function (data) {
+          if (!data || !data.success) {
+            throw new Error(data && data.message ? data.message : 'Cannot change language');
+          }
+          window.location.reload();
+        })
+        .catch(function () {
+          item.disabled = false;
+        });
+    });
+  });
+});
+</script>
 <main class="container page-shell">

@@ -34,6 +34,17 @@ function asset_url($path) {
     return base_url($path);
 }
 
+function country_icon_html($icon) {
+    $icon = trim((string)$icon);
+    if ($icon === '') {
+        return '<span class="language-menu__emoji" aria-hidden="true">🌐</span>';
+    }
+    if (preg_match('#^(https?://|/|r2:)#i', $icon)) {
+        return '<img src="' . h(asset_url($icon)) . '" alt="" loading="lazy">';
+    }
+    return '<span class="language-menu__emoji" aria-hidden="true">' . h($icon) . '</span>';
+}
+
 function json_array($json) {
     if (!$json) return [];
     $data = json_decode($json, true);

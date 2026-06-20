@@ -1,4 +1,8 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/includes/functions.php';
 require_once __DIR__ . '/includes/visit_tracker.php';
@@ -6,7 +10,7 @@ require_once __DIR__ . '/includes/visit_tracker.php';
 visit_track_daily_ip($pdo ?? null);
 
 $slug = trim($_GET['page'] ?? ($_GET['slug'] ?? ''));
-$page_lang = trim($_GET['lang'] ?? 'vi');
+$page_lang = trim($_GET['lang'] ?? ($_SESSION['key_lang'] ?? 'vi'));
 $page = null;
 $error_message = $db_error ?? '';
 
