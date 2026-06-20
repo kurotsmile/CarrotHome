@@ -5,7 +5,6 @@ $footer_page_columns = [
         'about' => ['footer.about', 'About'],
         'services' => ['footer.services', 'Services'],
         'contact' => ['footer.contact', 'Contact'],
-        'faq' => ['footer.faq', 'FAQ'],
     ],
     'footer.legal' => [
         'privacy-policy' => ['footer.privacy_policy', 'Privacy Policy'],

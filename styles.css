@@ -277,7 +277,7 @@ input:focus,select:focus{box-shadow:0 0 0 3px rgba(255,89,0,.16)}
 .content-page__header p:not(.eyebrow){max-width:680px;margin:12px auto 0;color:var(--muted);font-size:17px;line-height:1.65}
 .content-page__body{color:#303041;font-size:17px;line-height:1.8}
 .content-page__body h1,.content-page__body h2,.content-page__body h3{margin:28px 0 12px;color:var(--text);line-height:1.22}
-.content-page__body p,.content-page__body ul,.content-page__body ol{margin:0 0 18px}
+.content-page__body p,.content-page__body ul,.content-page__body ol{margin:0}
 .content-page__body ul,.content-page__body ol{padding-left:24px;list-style:revert}
 .content-page__body a{color:var(--accent);font-weight:800}
 .content-page__body img{height:auto;border-radius:8px}
