@@ -30,7 +30,6 @@ if ($pdo) {
             SELECT *
             FROM page
             WHERE slug = :slug
-              AND status = 'public'
               AND (lang = :lang_filter OR lang = '' OR lang IS NULL)
             ORDER BY CASE WHEN lang = :lang_order THEN 0 ELSE 1 END
             LIMIT 1
