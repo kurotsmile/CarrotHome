@@ -46,7 +46,6 @@ $current_language_label = $current_country['lang_country'] ?? ($current_key_lang
 <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
 <link rel="icon" href="favicon/favicon.ico" sizes="any">
 <link rel="manifest" href="favicon/site.webmanifest">
-<link rel="preload" href="fonts/mona-sans.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="styles.css?v=<?= $style_version ?>">
 </head>
 <body>
@@ -64,7 +63,7 @@ $current_language_label = $current_country['lang_country'] ?? ($current_key_lang
     <nav class="site-nav-main" aria-label="<?= h(ui_label('aria.primary_navigation', 'Primary navigation')) ?>">
       <a href="index.php"><?= h(ui_label('nav.explore', 'Explore')) ?></a>
       <a href="index.php?type=app"><?= h(ui_label('nav.applications', 'Applications')) ?></a>
-      <a href="index.php?type=game"><?= h(ui_label('nav.games', 'Games')) ?></a>
+      <a href="index.php?type=game"><?= h(ui_label('nav.game', 'Games')) ?></a>
       <?php if (count($header_countries) > 0): ?>
         <div class="language-menu">
           <button class="language-menu__trigger" type="button" aria-expanded="false" aria-haspopup="true">
