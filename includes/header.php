@@ -9,6 +9,7 @@ $style_version = file_exists(__DIR__ . '/../styles.css') ? filemtime(__DIR__ . '
 $header_search = trim($_GET['q'] ?? '');
 $header_countries = [];
 $current_key_lang = trim((string)($_SESSION['key_lang'] ?? ''));
+$current_country_id = (int)($_SESSION['country_id'] ?? 0);
 $current_country = null;
 
 if (isset($pdo) && $pdo instanceof PDO) {
@@ -21,9 +22,18 @@ if (isset($pdo) && $pdo instanceof PDO) {
 }
 
 foreach ($header_countries as $country) {
-    if ($current_key_lang !== '' && $country['lang_key'] === $current_key_lang) {
+    if ($current_country_id > 0 && (int)$country['id'] === $current_country_id) {
         $current_country = $country;
         break;
+    }
+}
+
+if (!$current_country) {
+    foreach ($header_countries as $country) {
+        if ($current_key_lang !== '' && $country['lang_key'] === $current_key_lang) {
+            $current_country = $country;
+            break;
+        }
     }
 }
 
@@ -31,6 +41,7 @@ if (!$current_country && count($header_countries) > 0) {
     $current_country = $header_countries[0];
 }
 
+$current_key_lang = $current_country['lang_key'] ?? ($current_key_lang ?: 'vi');
 $current_language_label = $current_country['lang_country'] ?? ($current_key_lang ?: 'Language');
 ?>
 <!doctype html>
@@ -73,11 +84,12 @@ $current_language_label = $current_country['lang_country'] ?? ($current_key_lang
           </button>
           <div class="language-menu__panel" role="menu">
             <?php foreach ($header_countries as $country): ?>
-              <?php $is_active = $current_key_lang !== '' && $country['lang_key'] === $current_key_lang; ?>
+              <?php $is_active = $current_country && (int) $country['id'] === (int) $current_country['id']; ?>
               <button
                 class="language-menu__item<?= $is_active ? ' is-active' : '' ?>"
                 type="button"
                 role="menuitem"
+                data-country-id="<?= (int) $country['id'] ?>"
                 data-lang-key="<?= h($country['lang_key']) ?>"
               >
                 <span class="language-menu__flag"><?= country_icon_html($country['icon'] ?? '') ?></span>
@@ -113,13 +125,14 @@ document.addEventListener('DOMContentLoaded', function () {
   items.forEach(function (item) {
     item.addEventListener('click', function () {
       var langKey = item.getAttribute('data-lang-key');
+      var countryId = item.getAttribute('data-country-id');
       if (!langKey) return;
 
       item.disabled = true;
       fetch('<?= h(base_url('language.php')) ?>', {
         method: 'POST',
         headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
-        body: 'lang_key=' + encodeURIComponent(langKey)
+        body: 'country_id=' + encodeURIComponent(countryId || '') + '&lang_key=' + encodeURIComponent(langKey)
       })
         .then(function (response) { return response.json(); })
         .then(function (data) {
