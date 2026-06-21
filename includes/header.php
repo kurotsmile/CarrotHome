@@ -42,7 +42,6 @@ if (!$current_country && count($header_countries) > 0) {
 }
 
 $current_key_lang = $current_country['lang_key'] ?? ($current_key_lang ?: 'vi');
-$current_language_label = $current_country['lang_country'] ?? ($current_key_lang ?: 'Language');
 ?>
 <!doctype html>
 <html lang="<?= h($current_key_lang ?: 'vi') ?>">
@@ -57,6 +56,7 @@ $current_language_label = $current_country['lang_country'] ?? ($current_key_lang
 <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
 <link rel="icon" href="favicon/favicon.ico" sizes="any">
 <link rel="manifest" href="favicon/site.webmanifest">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
 <link rel="stylesheet" href="styles.css?v=<?= $style_version ?>">
 </head>
 <body>
@@ -77,74 +77,100 @@ $current_language_label = $current_country['lang_country'] ?? ($current_key_lang
       <a href="index.php?type=game"><?= h(ui_label('nav.game', 'Games')) ?></a>
       <?php if (count($header_countries) > 0): ?>
         <div class="language-menu">
-          <button class="language-menu__trigger" type="button" aria-expanded="false" aria-haspopup="true">
-            <span class="language-menu__icon"><?= country_icon_html($current_country['icon'] ?? '') ?></span>
-            <span><?= h(strtoupper($current_language_label)) ?></span>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-          <div class="language-menu__panel" role="menu">
+          <select class="language-menu__select" aria-label="<?= h(ui_label('aria.choose_language', 'Choose language')) ?>">
             <?php foreach ($header_countries as $country): ?>
               <?php $is_active = $current_country && (int) $country['id'] === (int) $current_country['id']; ?>
-              <button
-                class="language-menu__item<?= $is_active ? ' is-active' : '' ?>"
-                type="button"
-                role="menuitem"
-                data-country-id="<?= (int) $country['id'] ?>"
+              <option
+                value="<?= (int) $country['id'] ?>"
                 data-lang-key="<?= h($country['lang_key']) ?>"
+                data-icon="<?= h($country['icon'] ?? '') ?>"
+                data-lang-country="<?= h($country['lang_country']) ?>"
+                <?= $is_active ? 'selected' : '' ?>
               >
-                <span class="language-menu__flag"><?= country_icon_html($country['icon'] ?? '') ?></span>
-                <span class="language-menu__name"><?= h($country['name']) ?></span>
-                <span class="language-menu__code"><?= h(strtoupper($country['lang_country'])) ?></span>
-              </button>
+                <?= h($country['name'] . ' (' . strtoupper($country['lang_country']) . ')') ?>
+              </option>
             <?php endforeach; ?>
-          </div>
+          </select>
         </div>
       <?php endif; ?>
     </nav>
   </div>
 </header>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-  var menu = document.querySelector('.language-menu');
-  if (!menu) return;
+  var select = document.querySelector('.language-menu__select');
+  if (!select) return;
 
-  var trigger = menu.querySelector('.language-menu__trigger');
-  var items = menu.querySelectorAll('.language-menu__item');
+  function iconMarkup(icon) {
+    icon = (icon || '').trim();
+    if (!icon) return '<span class="language-menu__emoji" aria-hidden="true">🌐</span>';
+    if (/^(https?:\/\/|\/|r2:)/i.test(icon)) {
+      if (icon.indexOf('r2:') === 0) {
+        icon = 'https://json-worker.tranthienthanh93.workers.dev/get_file?file=' + encodeURIComponent(icon.substring(3));
+      }
+      return '<img src="' + icon.replace(/"/g, '&quot;') + '" alt="" loading="lazy">';
+    }
+    return '<span class="language-menu__emoji" aria-hidden="true">' + icon.replace(/[&<>"']/g, function (char) {
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[char];
+    }) + '</span>';
+  }
 
-  trigger.addEventListener('click', function () {
-    var isOpen = menu.classList.toggle('is-open');
-    trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-  });
-
-  document.addEventListener('click', function (event) {
-    if (menu.contains(event.target)) return;
-    menu.classList.remove('is-open');
-    trigger.setAttribute('aria-expanded', 'false');
-  });
-
-  items.forEach(function (item) {
-    item.addEventListener('click', function () {
-      var langKey = item.getAttribute('data-lang-key');
-      var countryId = item.getAttribute('data-country-id');
-      if (!langKey) return;
-
-      item.disabled = true;
-      fetch('<?= h(base_url('language.php')) ?>', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
-        body: 'country_id=' + encodeURIComponent(countryId || '') + '&lang_key=' + encodeURIComponent(langKey)
-      })
-        .then(function (response) { return response.json(); })
-        .then(function (data) {
-          if (!data || !data.success) {
-            throw new Error(data && data.message ? data.message : 'Cannot change language');
-          }
-          window.location.reload();
-        })
-        .catch(function () {
-          item.disabled = false;
-        });
+  function escapeHtml(value) {
+    return String(value || '').replace(/[&<>"']/g, function (char) {
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[char];
     });
+  }
+
+  function languageTemplate(item) {
+    if (!item.id) return item.text;
+    var option = item.element;
+    var code = option ? (option.getAttribute('data-lang-country') || '') : '';
+    var icon = option ? (option.getAttribute('data-icon') || '') : '';
+    var name = String(item.text || '').replace(/\s+\([^)]+\)$/, '');
+    return jQuery(
+      '<span class="language-select2-option">' +
+        '<span class="language-menu__flag">' + iconMarkup(icon) + '</span>' +
+        '<span class="language-menu__name">' + escapeHtml(name) + '</span>' +
+        '<span class="language-menu__code">' + escapeHtml(code.toUpperCase()) + '</span>' +
+      '</span>'
+    );
+  }
+
+  if (window.jQuery && jQuery.fn.select2) {
+    jQuery(select).select2({
+      width: 'style',
+      dropdownCssClass: 'language-select2-dropdown',
+      dropdownAutoWidth: true,
+      templateResult: languageTemplate,
+      templateSelection: languageTemplate,
+      escapeMarkup: function (markup) { return markup; }
+    });
+  }
+
+  select.addEventListener('change', function () {
+    var selected = select.options[select.selectedIndex];
+    var langKey = selected ? selected.getAttribute('data-lang-key') : '';
+    var countryId = select.value;
+    if (!langKey) return;
+
+    select.disabled = true;
+    fetch('<?= h(base_url('language.php')) ?>', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
+      body: 'country_id=' + encodeURIComponent(countryId || '') + '&lang_key=' + encodeURIComponent(langKey)
+    })
+      .then(function (response) { return response.json(); })
+      .then(function (data) {
+        if (!data || !data.success) {
+          throw new Error(data && data.message ? data.message : 'Cannot change language');
+        }
+        window.location.reload();
+      })
+      .catch(function () {
+        select.disabled = false;
+      });
   });
 });
 </script>
