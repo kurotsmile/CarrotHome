@@ -84,10 +84,11 @@ $current_key_lang = $current_country['lang_key'] ?? ($current_key_lang ?: 'vi');
                 value="<?= (int) $country['id'] ?>"
                 data-lang-key="<?= h($country['lang_key']) ?>"
                 data-icon="<?= h($country['icon'] ?? '') ?>"
+                data-name="<?= h($country['name']) ?>"
                 data-lang-country="<?= h($country['lang_country']) ?>"
                 <?= $is_active ? 'selected' : '' ?>
               >
-                <?= h($country['name'] . ' (' . strtoupper($country['lang_country']) . ')') ?>
+                <?= h($country['name']) ?>
               </option>
             <?php endforeach; ?>
           </select>
@@ -128,7 +129,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var option = item.element;
     var code = option ? (option.getAttribute('data-lang-country') || '') : '';
     var icon = option ? (option.getAttribute('data-icon') || '') : '';
-    var name = String(item.text || '').replace(/\s+\([^)]+\)$/, '');
+    var name = option ? (option.getAttribute('data-name') || item.text) : item.text;
     return jQuery(
       '<span class="language-select2-option">' +
         '<span class="language-menu__flag">' + iconMarkup(icon) + '</span>' +
@@ -138,6 +139,18 @@ document.addEventListener('DOMContentLoaded', function () {
     );
   }
 
+  function languageMatcher(params, data) {
+    var term = String(params.term || '').trim().toLowerCase();
+    if (term === '') return data;
+    if (!data.element) return null;
+
+    var name = data.element.getAttribute('data-name') || data.text || '';
+    var code = data.element.getAttribute('data-lang-country') || '';
+    var key = data.element.getAttribute('data-lang-key') || '';
+    var haystack = [name, code, key].join(' ').toLowerCase();
+    return haystack.indexOf(term) !== -1 ? data : null;
+  }
+
   if (window.jQuery && jQuery.fn.select2) {
     jQuery(select).select2({
       width: 'style',
@@ -145,6 +158,7 @@ document.addEventListener('DOMContentLoaded', function () {
       dropdownAutoWidth: true,
       templateResult: languageTemplate,
       templateSelection: languageTemplate,
+      matcher: languageMatcher,
       escapeMarkup: function (markup) { return markup; }
     });
   }
