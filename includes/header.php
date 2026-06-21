@@ -103,6 +103,7 @@ $current_key_lang = $current_country['lang_key'] ?? ($current_key_lang ?: 'vi');
 document.addEventListener('DOMContentLoaded', function () {
   var select = document.querySelector('.language-menu__select');
   if (!select) return;
+  var languageChanging = false;
 
   function iconMarkup(icon) {
     icon = (icon || '').trim();
@@ -154,25 +155,36 @@ document.addEventListener('DOMContentLoaded', function () {
   if (window.jQuery && jQuery.fn.select2) {
     jQuery(select).select2({
       width: 'style',
+      dropdownParent: jQuery('.language-menu'),
       dropdownCssClass: 'language-select2-dropdown',
-      dropdownAutoWidth: true,
       templateResult: languageTemplate,
       templateSelection: languageTemplate,
       matcher: languageMatcher,
       escapeMarkup: function (markup) { return markup; }
     });
+
+    jQuery(select).on('select2:select', function (event) {
+      var option = event.params && event.params.data ? event.params.data.element : null;
+      changeLanguage(option || select.options[select.selectedIndex]);
+    });
   }
 
-  select.addEventListener('change', function () {
-    var selected = select.options[select.selectedIndex];
-    var langKey = selected ? selected.getAttribute('data-lang-key') : '';
-    var countryId = select.value;
+  function changeLanguage(selected) {
+    if (languageChanging || !selected) return;
+    var langKey = selected.getAttribute('data-lang-key') || '';
+    var countryId = selected.value || '';
     if (!langKey) return;
 
+    languageChanging = true;
     select.disabled = true;
+    if (window.jQuery && jQuery.fn.select2) {
+      jQuery(select).prop('disabled', true);
+    }
+
     fetch('<?= h(base_url('language.php')) ?>', {
       method: 'POST',
       headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
+      credentials: 'same-origin',
       body: 'country_id=' + encodeURIComponent(countryId || '') + '&lang_key=' + encodeURIComponent(langKey)
     })
       .then(function (response) { return response.json(); })
@@ -183,8 +195,16 @@ document.addEventListener('DOMContentLoaded', function () {
         window.location.reload();
       })
       .catch(function () {
+        languageChanging = false;
         select.disabled = false;
+        if (window.jQuery && jQuery.fn.select2) {
+          jQuery(select).prop('disabled', false);
+        }
       });
+  }
+
+  select.addEventListener('change', function () {
+    changeLanguage(select.options[select.selectedIndex]);
   });
 });
 </script>
