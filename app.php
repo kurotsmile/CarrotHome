@@ -63,6 +63,12 @@ $videos = app_video_links($app);
 $github_url = trim((string)($app['github'] ?? ''));
 $has_paid_github = !empty($_SESSION['paid_github_apps'][$app_name]);
 $share_url = ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? 'home.carrot28.com') . app_url($app_name);
+$source_price = trim((string)($app['price'] ?? ''));
+if ($source_price === '' || (float)$source_price <= 0) {
+    $source_price = trim((string)($paypal_config['amount'] ?? ''));
+}
+$source_price_label = $source_price !== '' ? number_format((float)$source_price, 2, '.', '') : '';
+$source_currency = trim((string)($paypal_config['currency'] ?? 'USD'));
 
 include 'includes/header.php';
 ?>
@@ -80,7 +86,8 @@ include 'includes/header.php';
       <div class="app-meta">
         <span class="badge"><?= h($app['status'] ?? '') ?></span>
         <?php if (!empty($app['created_at'])): ?>
-          <span class="badge"><?= h($app['created_at']) ?></span>
+          <?php $createdDate = date('Y-m-d', strtotime((string)$app['created_at'])); ?>
+          <span class="badge"><?= h($createdDate) ?></span>
         <?php endif; ?>
       </div>
       <div class="app-hero-actions">
@@ -148,16 +155,19 @@ include 'includes/header.php';
             <div class="source-promo__icon"><?= store_icon('github') ?></div>
             <p class="source-promo__label"><?= h(ui_label('source.code_label', 'Mã nguồn GitHub')) ?></p>
             <h3><?= h(ui_label('source.code_title', 'Mua source để tùy biến nhanh hơn')) ?></h3>
+            <?php if ($source_price_label !== ''): ?>
+              <p class="source-promo__price"><?= h($source_price_label) ?> <?= h($source_currency) ?></p>
+            <?php endif; ?>
             <p><?= h(ui_label('source.code_description', 'Sở hữu liên kết mã nguồn, triển khai phiên bản riêng và tiết kiệm thời gian phát triển sản phẩm.')) ?></p>
             <?php if ($has_paid_github): ?>
               <a class="source-promo__button" href="<?= h($github_url) ?>" target="_blank" rel="noopener noreferrer">
                 <?= store_icon('github') ?>
                 <span>GitHub</span>
               </a>
-            <?php elseif (!empty($paypal_config['enabled'])): ?>
+            <?php elseif (!empty($paypal_config['enabled']) && $source_price_label !== ''): ?>
               <a class="source-promo__button source-promo__button--paypal" href="<?= h(base_url('paypal-create.php?slug=' . urlencode($app_name))) ?>">
                 <?= store_icon('paypal') ?>
-                <span><?= h(ui_label('action.buy_source', 'Mua mã nguồn')) ?> <?= h($paypal_config['amount'] ?? '') ?> <?= h($paypal_config['currency'] ?? '') ?></span>
+                <span><?= h(ui_label('action.buy_source', 'Mua mã nguồn')) ?> <?= h($source_price_label) ?> <?= h($source_currency) ?></span>
               </a>
             <?php endif; ?>
           </div>
