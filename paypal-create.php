@@ -24,7 +24,7 @@ if (!function_exists('curl_init')) {
 
 $app = null;
 if ($pdo) {
-    $stmt = $pdo->prepare("SELECT id, github FROM app WHERE id = :slug AND status != 'trash' LIMIT 1");
+    $stmt = $pdo->prepare("SELECT id, github, price FROM app WHERE id = :slug AND status != 'trash' LIMIT 1");
     $stmt->execute([':slug' => $slug]);
     $app = $stmt->fetch();
 }
@@ -33,6 +33,16 @@ if (!$app || empty($app['github'])) {
     http_response_code(404);
     exit('Paid link is not available.');
 }
+
+$source_price = trim((string)($app['price'] ?? ''));
+if ($source_price === '' || (float)$source_price <= 0) {
+    $source_price = trim((string)($paypal_config['amount'] ?? ''));
+}
+if ($source_price === '' || (float)$source_price <= 0) {
+    http_response_code(400);
+    exit('Source price is not configured.');
+}
+$source_price = number_format((float)$source_price, 2, '.', '');
 
 $base_api = !empty($paypal_config['sandbox']) ? 'https://api-m.sandbox.paypal.com' : 'https://api-m.paypal.com';
 $auth = base64_encode($paypal_config['client_id'] . ':' . $paypal_config['client_secret']);
@@ -69,7 +79,7 @@ $payload = [
         'description' => 'GitHub source link for ' . $slug,
         'amount' => [
             'currency_code' => $paypal_config['currency'],
-            'value' => $paypal_config['amount'],
+            'value' => $source_price,
         ],
     ]],
     'application_context' => [
