@@ -24,7 +24,7 @@ if (!function_exists('curl_init')) {
 
 $app = null;
 if ($pdo) {
-    $stmt = $pdo->prepare("SELECT id, github, price FROM app WHERE id = :slug AND status != 'trash' LIMIT 1");
+    $stmt = $pdo->prepare("SELECT * FROM app WHERE id = :slug AND status != 'trash' LIMIT 1");
     $stmt->execute([':slug' => $slug]);
     $app = $stmt->fetch();
 }
