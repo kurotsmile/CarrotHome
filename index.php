@@ -53,7 +53,7 @@ if ($pdo) {
 
         $sql = "SELECT id, id AS slug, decription, github, microsoft_store, icon, itch, exe_file, ipa_file, deb_file,
                        amazon_app_store, huawei_store, youtube_link, google_play, dmg_file, uptodown,
-                       simmer, type, apk_file, status, sync_status, priority, category, created_at
+                       simmer, type, apk_file, status, priority, price, category, created_at
                 FROM app
                 {$where_sql}
                 ORDER BY priority DESC, created_at DESC, id ASC
