@@ -78,6 +78,8 @@ if ($source_price === '' || (float)$source_price <= 0) {
 }
 $source_price_label = $source_price !== '' ? number_format((float)$source_price, 2, '.', '') : '';
 $source_currency = trim((string)($paypal_config['currency'] ?? 'USD'));
+$extra_head = '<link rel="stylesheet" href="responsive-lightbox-slider-web/css/style.css">' . "\n"
+    . '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css">' . "\n";
 
 include 'includes/header.php';
 ?>
@@ -118,27 +120,14 @@ include 'includes/header.php';
     <div class="app-detail-content">
       <?php if (count($images)): ?>
         <h3><?= h(ui_label('section.screenshots', 'Ảnh giới thiệu')) ?></h3>
-        <div class="app-photo-slider" data-app-photo-slider>
-          <button class="app-photo-slider__nav app-photo-slider__nav--prev" type="button" aria-label="<?= h(ui_label('action.previous', 'Previous')) ?>">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-          <div class="app-photo-slider__track" tabindex="0">
-            <?php foreach (array_values($images) as $image): ?>
-              <?php $imageUrl = trim((string) ($image['image_url'] ?? '')); ?>
-              <?php if ($imageUrl !== ''): ?>
-                <?php $resolvedImageUrl = asset_url($imageUrl); ?>
-                <figure class="app-photo-slider__slide">
-                  <button class="app-photo-slider__zoom" type="button" data-lightbox-image="<?= h($resolvedImageUrl) ?>" aria-label="<?= h(ui_label('action.view_image', 'View image')) ?>">
-                    <img src="<?= h($resolvedImageUrl) ?>" alt="<?= h($app_name) ?> screenshot" loading="lazy">
-                  </button>
-                </figure>
+        <section class="useSliderPlugin">
+          <?php foreach (array_values($images) as $image): ?>
+            <?php $imageUrl = trim((string) ($image['image_url'] ?? '')); ?>
+            <?php if ($imageUrl !== ''): ?>
+              <img src="<?= h(asset_url($imageUrl)) ?>" alt="<?= h($app_name) ?> screenshot" loading="lazy">
             <?php endif; ?>
           <?php endforeach; ?>
-          </div>
-          <button class="app-photo-slider__nav app-photo-slider__nav--next" type="button" aria-label="<?= h(ui_label('action.next', 'Next')) ?>">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-        </div>
+        </section>
       <?php endif; ?>
 
       <?php if (!empty($app['decription'])): ?>
@@ -200,13 +189,7 @@ include 'includes/header.php';
   </div>
 </section>
 
-<div class="app-image-lightbox" data-app-image-lightbox aria-hidden="true">
-  <button class="app-image-lightbox__close" type="button" aria-label="<?= h(ui_label('action.close', 'Close')) ?>">
-    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-  </button>
-  <img src="" alt="<?= h($app_name) ?> screenshot">
-</div>
-
+<script src="responsive-lightbox-slider-web/js/imagesSlider.js"></script>
 <script>
 document.querySelectorAll('.share-button').forEach(function(button){
   button.addEventListener('click', function(){
@@ -220,68 +203,6 @@ document.querySelectorAll('.share-button').forEach(function(button){
       navigator.clipboard.writeText(shareUrl);
       button.classList.add('is-copied');
       setTimeout(function(){ button.classList.remove('is-copied'); }, 1600);
-    }
-  });
-});
-
-document.querySelectorAll('[data-app-photo-slider]').forEach(function(slider){
-  var track = slider.querySelector('.app-photo-slider__track');
-  var prev = slider.querySelector('.app-photo-slider__nav--prev');
-  var next = slider.querySelector('.app-photo-slider__nav--next');
-  if (!track || !prev || !next) {
-    return;
-  }
-
-  function slideAmount() {
-    var slide = track.querySelector('.app-photo-slider__slide');
-    if (!slide) {
-      return track.clientWidth;
-    }
-    var styles = window.getComputedStyle(track);
-    var gap = parseFloat(styles.columnGap || styles.gap || 0);
-    return slide.getBoundingClientRect().width + gap;
-  }
-
-  prev.addEventListener('click', function(){
-    track.scrollBy({left: -slideAmount(), behavior: 'smooth'});
-  });
-
-  next.addEventListener('click', function(){
-    track.scrollBy({left: slideAmount(), behavior: 'smooth'});
-  });
-});
-
-var lightbox = document.querySelector('[data-app-image-lightbox]');
-if (lightbox) {
-  var lightboxImage = lightbox.querySelector('img');
-  var closeLightbox = lightbox.querySelector('.app-image-lightbox__close');
-
-  function hideLightbox() {
-    lightbox.classList.remove('is-open');
-    lightbox.setAttribute('aria-hidden', 'true');
-    lightboxImage.setAttribute('src', '');
-    document.body.classList.remove('has-lightbox-open');
-  }
-
-  document.querySelectorAll('[data-lightbox-image]').forEach(function(button){
-    button.addEventListener('click', function(){
-      lightboxImage.setAttribute('src', button.getAttribute('data-lightbox-image'));
-      lightbox.classList.add('is-open');
-      lightbox.setAttribute('aria-hidden', 'false');
-      document.body.classList.add('has-lightbox-open');
-      closeLightbox.focus();
-    });
-  });
-
-  closeLightbox.addEventListener('click', hideLightbox);
-  lightbox.addEventListener('click', function(event){
-    if (event.target === lightbox) {
-      hideLightbox();
-    }
-  });
-  document.addEventListener('keydown', function(event){
-    if (event.key === 'Escape' && lightbox.classList.contains('is-open')) {
-      hideLightbox();
     }
   });
 });
