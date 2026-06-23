@@ -248,11 +248,11 @@ document.querySelectorAll('[data-app-photo-slider]').forEach(function(slider){
     },
     breakpoints: {
       760: {
-        slidesPerView: 1.18,
+        slidesPerView: 1,
         spaceBetween: 22
       },
       1120: {
-        slidesPerView: 1.34,
+        slidesPerView: 1,
         spaceBetween: 24
       }
     }
