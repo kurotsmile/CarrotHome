@@ -121,7 +121,6 @@ include 'includes/header.php';
   <div class="app-detail-layout">
     <div class="app-detail-content">
       <?php if (count($images)): ?>
-        <h3><?= h(ui_label('section.screenshots', 'Ảnh giới thiệu')) ?></h3>
         <section class="useSliderPlugin imagesSec">
           <?php foreach (array_values($images) as $image): ?>
             <?php $imageUrl = trim((string) ($image['image_url'] ?? '')); ?>

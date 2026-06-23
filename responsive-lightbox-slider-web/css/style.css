@@ -8,9 +8,9 @@
     width: fit-content;
     max-width: 100%;
     margin: 0 auto 30px;
-    border: 5px solid #eee;
-    border-radius: 10px;
-    padding: 40px;
+    border: 0;
+    border-radius: 0;
+    padding: 12px 2px 18px;
     overflow-x: auto;
     overscroll-behavior-x: contain;
     scroll-behavior: smooth;
@@ -109,7 +109,7 @@
         grid-auto-columns: 190px;
         gap: 12px;
         width: 100%;
-        padding: 20px;
+        padding: 10px 2px 16px;
     }
 
     .imagesSec img{
