@@ -1,6 +1,10 @@
 $.fn.mySliderPlugin=function(){
     return this.each(function(){
     var slider = $(this);
+    if (slider.data("images-slider-ready")) {
+        return;
+    }
+    slider.data("images-slider-ready", true);
     var fullScreenSection='<section class="fullScreen"><button class="sliderLightboxButton" id="prevIcon" type="button" aria-label="Previous image"><i class="fas fa-solid fa-chevron-left"></i></button><img src="" id="maximizedImg" alt=""><button class="sliderLightboxButton" id="nextIcon" type="button" aria-label="Next image"><i class="fas fa-solid fa-chevron-right"></i></button><button class="sliderLightboxButton" id="cancelIcon" type="button" aria-label="Close"><i class="fa fa-times" aria-hidden="true"></i></button></section>';
     
     slider.parent().append(fullScreenSection);

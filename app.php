@@ -78,7 +78,9 @@ if ($source_price === '' || (float)$source_price <= 0) {
 }
 $source_price_label = $source_price !== '' ? number_format((float)$source_price, 2, '.', '') : '';
 $source_currency = trim((string)($paypal_config['currency'] ?? 'USD'));
-$extra_head = '<link rel="stylesheet" href="responsive-lightbox-slider-web/css/style.css">' . "\n"
+$slider_style_version = file_exists(__DIR__ . '/responsive-lightbox-slider-web/css/style.css') ? filemtime(__DIR__ . '/responsive-lightbox-slider-web/css/style.css') : time();
+$slider_script_version = file_exists(__DIR__ . '/responsive-lightbox-slider-web/js/imagesSlider.js') ? filemtime(__DIR__ . '/responsive-lightbox-slider-web/js/imagesSlider.js') : time();
+$extra_head = '<link rel="stylesheet" href="responsive-lightbox-slider-web/css/style.css?v=' . $slider_style_version . '">' . "\n"
     . '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css">' . "\n";
 
 include 'includes/header.php';
@@ -120,7 +122,7 @@ include 'includes/header.php';
     <div class="app-detail-content">
       <?php if (count($images)): ?>
         <h3><?= h(ui_label('section.screenshots', 'Ảnh giới thiệu')) ?></h3>
-        <section class="useSliderPlugin">
+        <section class="useSliderPlugin imagesSec">
           <?php foreach (array_values($images) as $image): ?>
             <?php $imageUrl = trim((string) ($image['image_url'] ?? '')); ?>
             <?php if ($imageUrl !== ''): ?>
@@ -189,7 +191,7 @@ include 'includes/header.php';
   </div>
 </section>
 
-<script src="responsive-lightbox-slider-web/js/imagesSlider.js"></script>
+<script src="responsive-lightbox-slider-web/js/imagesSlider.js?v=<?= (int) $slider_script_version ?>"></script>
 <script>
 document.querySelectorAll('.share-button').forEach(function(button){
   button.addEventListener('click', function(){
