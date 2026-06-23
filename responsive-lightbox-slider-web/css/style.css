@@ -15,7 +15,11 @@
     overscroll-behavior-x: contain;
     scroll-behavior: smooth;
     scroll-snap-type: x mandatory;
-    scrollbar-width: thin;
+    scrollbar-width: none;
+}
+
+.imagesSec::-webkit-scrollbar{
+    display: none;
 }
 
 .imagesSec img{

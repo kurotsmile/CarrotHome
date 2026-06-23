@@ -14,12 +14,67 @@ $.fn.mySliderPlugin=function(){
     var nextIcon = fullScreen.find("#nextIcon");
     var prevIcon = fullScreen.find("#prevIcon");
     var cancelIcon = fullScreen.find("#cancelIcon");
+    var hoverScrollTimer = null;
 
     /////////////// events on this slider plugin ///////////////
+
+    function itemScrollAmount() {
+        var firstImg = slider.find("img").first();
+        if (!firstImg.length) {
+            return 220;
+        }
+        return firstImg.outerWidth(true);
+    }
+
+    function stopHoverScroll() {
+        if (hoverScrollTimer) {
+            clearInterval(hoverScrollTimer);
+            hoverScrollTimer = null;
+        }
+    }
+
+    function startHoverScroll(direction) {
+        if (hoverScrollTimer && slider.data("hover-scroll-direction") === direction) {
+            return;
+        }
+        stopHoverScroll();
+        slider.data("hover-scroll-direction", direction);
+        function scrollOnce() {
+            slider[0].scrollBy({
+                left: direction * itemScrollAmount(),
+                behavior: "smooth"
+            });
+        }
+        scrollOnce();
+        hoverScrollTimer = setInterval(scrollOnce, 520);
+    }
 
     slider.find("img").on("click",function(){
     maximizedImg.attr("src",$(this).attr("src"));
     fullScreen.fadeIn(200).css("display","flex");
+    });
+
+    slider.on("mousemove",function(e){
+        if (slider[0].scrollWidth <= slider[0].clientWidth) {
+            stopHoverScroll();
+            return;
+        }
+
+        var rect = slider[0].getBoundingClientRect();
+        var x = e.clientX - rect.left;
+        var edgeSize = Math.min(90, rect.width * 0.22);
+
+        if (x <= edgeSize) {
+            startHoverScroll(-1);
+        } else if (x >= rect.width - edgeSize) {
+            startHoverScroll(1);
+        } else {
+            stopHoverScroll();
+        }
+    });
+
+    slider.on("mouseleave",function(){
+        stopHoverScroll();
     });
     
     
