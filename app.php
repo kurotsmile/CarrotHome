@@ -30,7 +30,7 @@ if ($pdo) {
         $app = $stmt->fetch();
         if ($app) {
             try {
-                $photoStmt = $pdo->prepare('SELECT image_url, title FROM app_photo WHERE app_id = :slug ORDER BY sort_order ASC, id ASC');
+                $photoStmt = $pdo->prepare('SELECT image_url FROM app_photo WHERE app_id = :slug ORDER BY sort_order ASC, id ASC');
                 $photoStmt->execute([':slug' => $slug]);
                 $images = $photoStmt->fetchAll();
             } catch (Throwable $photoError) {
@@ -133,10 +133,7 @@ include 'includes/header.php';
               <?php $imageUrl = trim((string) ($image['image_url'] ?? '')); ?>
               <?php if ($imageUrl !== ''): ?>
                 <figure class="app-photo-slider__slide">
-                  <img src="<?= h(asset_url($imageUrl)) ?>" alt="<?= h(($image['title'] ?? '') ?: ($app_name . ' screenshot')) ?>" loading="lazy">
-                  <?php if (!empty($image['title'])): ?>
-                    <figcaption><?= h($image['title']) ?></figcaption>
-                  <?php endif; ?>
+                  <img src="<?= h(asset_url($imageUrl)) ?>" alt="<?= h($app_name) ?> screenshot" loading="lazy">
                 </figure>
             <?php endif; ?>
           <?php endforeach; ?>
