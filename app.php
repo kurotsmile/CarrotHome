@@ -78,7 +78,6 @@ if ($source_price === '' || (float)$source_price <= 0) {
 }
 $source_price_label = $source_price !== '' ? number_format((float)$source_price, 2, '.', '') : '';
 $source_currency = trim((string)($paypal_config['currency'] ?? 'USD'));
-$extra_head = '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">' . "\n";
 
 include 'includes/header.php';
 ?>
@@ -119,16 +118,16 @@ include 'includes/header.php';
     <div class="app-detail-content">
       <?php if (count($images)): ?>
         <h3><?= h(ui_label('section.screenshots', 'Ảnh giới thiệu')) ?></h3>
-        <div class="app-photo-slider swiper" data-app-photo-slider>
+        <div class="app-photo-slider" data-app-photo-slider>
           <button class="app-photo-slider__nav app-photo-slider__nav--prev" type="button" aria-label="<?= h(ui_label('action.previous', 'Previous')) ?>">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
-          <div class="app-photo-slider__track swiper-wrapper">
+          <div class="app-photo-slider__track" tabindex="0">
             <?php foreach (array_values($images) as $image): ?>
               <?php $imageUrl = trim((string) ($image['image_url'] ?? '')); ?>
               <?php if ($imageUrl !== ''): ?>
                 <?php $resolvedImageUrl = asset_url($imageUrl); ?>
-                <figure class="app-photo-slider__slide swiper-slide">
+                <figure class="app-photo-slider__slide">
                   <button class="app-photo-slider__zoom" type="button" data-lightbox-image="<?= h($resolvedImageUrl) ?>" aria-label="<?= h(ui_label('action.view_image', 'View image')) ?>">
                     <img src="<?= h($resolvedImageUrl) ?>" alt="<?= h($app_name) ?> screenshot" loading="lazy">
                   </button>
@@ -139,7 +138,6 @@ include 'includes/header.php';
           <button class="app-photo-slider__nav app-photo-slider__nav--next" type="button" aria-label="<?= h(ui_label('action.next', 'Next')) ?>">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
-          <div class="app-photo-slider__pagination"></div>
         </div>
       <?php endif; ?>
 
@@ -209,7 +207,6 @@ include 'includes/header.php';
   <img src="" alt="<?= h($app_name) ?> screenshot">
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script>
 document.querySelectorAll('.share-button').forEach(function(button){
   button.addEventListener('click', function(){
@@ -228,34 +225,29 @@ document.querySelectorAll('.share-button').forEach(function(button){
 });
 
 document.querySelectorAll('[data-app-photo-slider]').forEach(function(slider){
-  if (typeof Swiper === 'undefined') {
+  var track = slider.querySelector('.app-photo-slider__track');
+  var prev = slider.querySelector('.app-photo-slider__nav--prev');
+  var next = slider.querySelector('.app-photo-slider__nav--next');
+  if (!track || !prev || !next) {
     return;
   }
 
-  new Swiper(slider, {
-    slidesPerView: 1,
-    centeredSlides: true,
-    spaceBetween: 18,
-    grabCursor: true,
-    keyboard: {enabled: true},
-    pagination: {
-      el: slider.querySelector('.app-photo-slider__pagination'),
-      clickable: true
-    },
-    navigation: {
-      prevEl: slider.querySelector('.app-photo-slider__nav--prev'),
-      nextEl: slider.querySelector('.app-photo-slider__nav--next')
-    },
-    breakpoints: {
-      760: {
-        slidesPerView: 1,
-        spaceBetween: 22
-      },
-      1120: {
-        slidesPerView: 1,
-        spaceBetween: 24
-      }
+  function slideAmount() {
+    var slide = track.querySelector('.app-photo-slider__slide');
+    if (!slide) {
+      return track.clientWidth;
     }
+    var styles = window.getComputedStyle(track);
+    var gap = parseFloat(styles.columnGap || styles.gap || 0);
+    return slide.getBoundingClientRect().width + gap;
+  }
+
+  prev.addEventListener('click', function(){
+    track.scrollBy({left: -slideAmount(), behavior: 'smooth'});
+  });
+
+  next.addEventListener('click', function(){
+    track.scrollBy({left: slideAmount(), behavior: 'smooth'});
   });
 });
 
