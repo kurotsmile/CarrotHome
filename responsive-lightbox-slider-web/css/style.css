@@ -29,7 +29,7 @@
     object-fit: cover;
     border: 0;
     border-radius: 10px;
-    margin: 10px;
+    margin: 33px 10px;
     background: #fff;
     box-shadow: 0 0 10px 5px #ccc;
     scroll-snap-align: start;
