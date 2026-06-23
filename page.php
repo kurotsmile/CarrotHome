@@ -10,7 +10,7 @@ require_once __DIR__ . '/includes/visit_tracker.php';
 visit_track_daily_ip($pdo ?? null);
 
 $slug = trim($_GET['page'] ?? ($_GET['slug'] ?? ''));
-$page_lang = trim($_GET['lang'] ?? ($_SESSION['key_lang'] ?? 'vi'));
+$page_lang = trim($_GET['lang'] ?? ($_SESSION['key_lang'] ?? 'en'));
 $page = null;
 $error_message = $db_error ?? '';
 

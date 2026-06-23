@@ -37,14 +37,23 @@ if (!$current_country) {
     }
 }
 
+if (!$current_country) {
+    foreach ($header_countries as $country) {
+        if ($country['lang_key'] === 'en') {
+            $current_country = $country;
+            break;
+        }
+    }
+}
+
 if (!$current_country && count($header_countries) > 0) {
     $current_country = $header_countries[0];
 }
 
-$current_key_lang = $current_country['lang_key'] ?? ($current_key_lang ?: 'vi');
+$current_key_lang = $current_country['lang_key'] ?? ($current_key_lang ?: 'en');
 ?>
 <!doctype html>
-<html lang="<?= h($current_key_lang ?: 'vi') ?>">
+<html lang="<?= h($current_key_lang ?: 'en') ?>">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">

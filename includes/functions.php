@@ -8,7 +8,7 @@ function current_lang_key() {
         session_start();
     }
 
-    return trim((string)($_SESSION['key_lang'] ?? 'vi')) ?: 'vi';
+    return trim((string)($_SESSION['key_lang'] ?? 'en')) ?: 'en';
 }
 
 function ui_label($key, $default, $lang_key = null) {
@@ -16,7 +16,7 @@ function ui_label($key, $default, $lang_key = null) {
 
     $key = trim((string)$key);
     $default = (string)$default;
-    $lang_key = trim((string)($lang_key ?? current_lang_key())) ?: 'vi';
+    $lang_key = trim((string)($lang_key ?? current_lang_key())) ?: 'en';
 
     if ($key === '') {
         return $default;
