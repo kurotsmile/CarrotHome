@@ -66,6 +66,7 @@ $current_key_lang = $current_country['lang_key'] ?? ($current_key_lang ?: 'en');
 <link rel="icon" href="favicon/favicon.ico" sizes="any">
 <link rel="manifest" href="favicon/site.webmanifest">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
+<?= $extra_head ?? '' ?>
 <link rel="stylesheet" href="styles.css?v=<?= $style_version ?>">
 </head>
 <body>

@@ -78,6 +78,7 @@ if ($source_price === '' || (float)$source_price <= 0) {
 }
 $source_price_label = $source_price !== '' ? number_format((float)$source_price, 2, '.', '') : '';
 $source_currency = trim((string)($paypal_config['currency'] ?? 'USD'));
+$extra_head = '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">' . "\n";
 
 include 'includes/header.php';
 ?>
@@ -116,24 +117,21 @@ include 'includes/header.php';
 
   <div class="app-detail-layout">
     <div class="app-detail-content">
-      <?php if (!empty($app['decription'])): ?>
-        <div class="app-description">
-          <?= nl2br(h($app['decription'])) ?>
-        </div>
-      <?php endif; ?>
-
       <?php if (count($images)): ?>
         <h3><?= h(ui_label('section.screenshots', 'Ảnh giới thiệu')) ?></h3>
-        <div class="app-photo-slider" data-app-photo-slider>
+        <div class="app-photo-slider swiper" data-app-photo-slider>
           <button class="app-photo-slider__nav app-photo-slider__nav--prev" type="button" aria-label="<?= h(ui_label('action.previous', 'Previous')) ?>">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
-          <div class="app-photo-slider__track">
+          <div class="app-photo-slider__track swiper-wrapper">
             <?php foreach (array_values($images) as $image): ?>
               <?php $imageUrl = trim((string) ($image['image_url'] ?? '')); ?>
               <?php if ($imageUrl !== ''): ?>
-                <figure class="app-photo-slider__slide">
-                  <img src="<?= h(asset_url($imageUrl)) ?>" alt="<?= h($app_name) ?> screenshot" loading="lazy">
+                <?php $resolvedImageUrl = asset_url($imageUrl); ?>
+                <figure class="app-photo-slider__slide swiper-slide">
+                  <button class="app-photo-slider__zoom" type="button" data-lightbox-image="<?= h($resolvedImageUrl) ?>" aria-label="<?= h(ui_label('action.view_image', 'View image')) ?>">
+                    <img src="<?= h($resolvedImageUrl) ?>" alt="<?= h($app_name) ?> screenshot" loading="lazy">
+                  </button>
                 </figure>
             <?php endif; ?>
           <?php endforeach; ?>
@@ -141,6 +139,13 @@ include 'includes/header.php';
           <button class="app-photo-slider__nav app-photo-slider__nav--next" type="button" aria-label="<?= h(ui_label('action.next', 'Next')) ?>">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
+          <div class="app-photo-slider__pagination"></div>
+        </div>
+      <?php endif; ?>
+
+      <?php if (!empty($app['decription'])): ?>
+        <div class="app-description">
+          <?= nl2br(h($app['decription'])) ?>
         </div>
       <?php endif; ?>
 
@@ -197,6 +202,14 @@ include 'includes/header.php';
   </div>
 </section>
 
+<div class="app-image-lightbox" data-app-image-lightbox aria-hidden="true">
+  <button class="app-image-lightbox__close" type="button" aria-label="<?= h(ui_label('action.close', 'Close')) ?>">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+  </button>
+  <img src="" alt="<?= h($app_name) ?> screenshot">
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script>
 document.querySelectorAll('.share-button').forEach(function(button){
   button.addEventListener('click', function(){
@@ -215,24 +228,69 @@ document.querySelectorAll('.share-button').forEach(function(button){
 });
 
 document.querySelectorAll('[data-app-photo-slider]').forEach(function(slider){
-  var track = slider.querySelector('.app-photo-slider__track');
-  var prev = slider.querySelector('.app-photo-slider__nav--prev');
-  var next = slider.querySelector('.app-photo-slider__nav--next');
-  if (!track || !prev || !next) {
+  if (typeof Swiper === 'undefined') {
     return;
   }
 
-  function slideSize() {
-    var slide = track.querySelector('.app-photo-slider__slide');
-    return slide ? slide.getBoundingClientRect().width + 16 : track.clientWidth;
+  new Swiper(slider, {
+    slidesPerView: 1,
+    centeredSlides: true,
+    spaceBetween: 18,
+    grabCursor: true,
+    keyboard: {enabled: true},
+    pagination: {
+      el: slider.querySelector('.app-photo-slider__pagination'),
+      clickable: true
+    },
+    navigation: {
+      prevEl: slider.querySelector('.app-photo-slider__nav--prev'),
+      nextEl: slider.querySelector('.app-photo-slider__nav--next')
+    },
+    breakpoints: {
+      760: {
+        slidesPerView: 1.18,
+        spaceBetween: 22
+      },
+      1120: {
+        slidesPerView: 1.34,
+        spaceBetween: 24
+      }
+    }
+  });
+});
+
+var lightbox = document.querySelector('[data-app-image-lightbox]');
+if (lightbox) {
+  var lightboxImage = lightbox.querySelector('img');
+  var closeLightbox = lightbox.querySelector('.app-image-lightbox__close');
+
+  function hideLightbox() {
+    lightbox.classList.remove('is-open');
+    lightbox.setAttribute('aria-hidden', 'true');
+    lightboxImage.setAttribute('src', '');
+    document.body.classList.remove('has-lightbox-open');
   }
 
-  prev.addEventListener('click', function(){
-    track.scrollBy({left: -slideSize(), behavior: 'smooth'});
+  document.querySelectorAll('[data-lightbox-image]').forEach(function(button){
+    button.addEventListener('click', function(){
+      lightboxImage.setAttribute('src', button.getAttribute('data-lightbox-image'));
+      lightbox.classList.add('is-open');
+      lightbox.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('has-lightbox-open');
+      closeLightbox.focus();
+    });
   });
 
-  next.addEventListener('click', function(){
-    track.scrollBy({left: slideSize(), behavior: 'smooth'});
+  closeLightbox.addEventListener('click', hideLightbox);
+  lightbox.addEventListener('click', function(event){
+    if (event.target === lightbox) {
+      hideLightbox();
+    }
+  });
+  document.addEventListener('keydown', function(event){
+    if (event.key === 'Escape' && lightbox.classList.contains('is-open')) {
+      hideLightbox();
+    }
   });
 });
 </script>
