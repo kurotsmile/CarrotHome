@@ -9,6 +9,7 @@ visit_track_daily_ip($pdo ?? null);
 
 $slug = trim($_GET['slug'] ?? '');
 $app = null;
+$images = [];
 $error_message = $db_error ?? '';
 $paypal_config = file_exists(__DIR__ . '/config/paypal.php') ? require __DIR__ . '/config/paypal.php' : [];
 
@@ -27,6 +28,15 @@ if ($pdo) {
         $stmt = $pdo->prepare("SELECT * FROM app WHERE id = :slug AND status != 'trash' LIMIT 1");
         $stmt->execute([':slug' => $slug]);
         $app = $stmt->fetch();
+        if ($app) {
+            try {
+                $photoStmt = $pdo->prepare('SELECT image_url, title FROM app_photo WHERE app_id = :slug ORDER BY sort_order ASC, id ASC');
+                $photoStmt->execute([':slug' => $slug]);
+                $images = $photoStmt->fetchAll();
+            } catch (Throwable $photoError) {
+                $images = [];
+            }
+        }
     } catch (Throwable $e) {
         $error_message = $e->getMessage();
     }
@@ -56,7 +66,6 @@ $app_name = $app['id'] ?? 'App';
 $page_title = $app_name . ' - CarrotHome';
 $page_description = 'Download ' . $app_name . ' for Android, Windows, macOS, Linux and other platforms.';
 
-$images = [];
 $downloads = app_download_links($app);
 $stores = app_store_links($app);
 $videos = app_video_links($app);
@@ -115,12 +124,26 @@ include 'includes/header.php';
 
       <?php if (count($images)): ?>
         <h3><?= h(ui_label('section.screenshots', 'Ảnh giới thiệu')) ?></h3>
-        <div class="gallery-grid">
-          <?php foreach (array_values($images) as $image_url): ?>
-            <?php if (!empty($image_url)): ?>
-              <img src="<?= h(asset_url($image_url)) ?>" alt="<?= h($app_name) ?> screenshot" loading="lazy">
+        <div class="app-photo-slider" data-app-photo-slider>
+          <button class="app-photo-slider__nav app-photo-slider__nav--prev" type="button" aria-label="<?= h(ui_label('action.previous', 'Previous')) ?>">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="app-photo-slider__track">
+            <?php foreach (array_values($images) as $image): ?>
+              <?php $imageUrl = trim((string) ($image['image_url'] ?? '')); ?>
+              <?php if ($imageUrl !== ''): ?>
+                <figure class="app-photo-slider__slide">
+                  <img src="<?= h(asset_url($imageUrl)) ?>" alt="<?= h(($image['title'] ?? '') ?: ($app_name . ' screenshot')) ?>" loading="lazy">
+                  <?php if (!empty($image['title'])): ?>
+                    <figcaption><?= h($image['title']) ?></figcaption>
+                  <?php endif; ?>
+                </figure>
             <?php endif; ?>
           <?php endforeach; ?>
+          </div>
+          <button class="app-photo-slider__nav app-photo-slider__nav--next" type="button" aria-label="<?= h(ui_label('action.next', 'Next')) ?>">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
         </div>
       <?php endif; ?>
 
@@ -191,6 +214,28 @@ document.querySelectorAll('.share-button').forEach(function(button){
       button.classList.add('is-copied');
       setTimeout(function(){ button.classList.remove('is-copied'); }, 1600);
     }
+  });
+});
+
+document.querySelectorAll('[data-app-photo-slider]').forEach(function(slider){
+  var track = slider.querySelector('.app-photo-slider__track');
+  var prev = slider.querySelector('.app-photo-slider__nav--prev');
+  var next = slider.querySelector('.app-photo-slider__nav--next');
+  if (!track || !prev || !next) {
+    return;
+  }
+
+  function slideSize() {
+    var slide = track.querySelector('.app-photo-slider__slide');
+    return slide ? slide.getBoundingClientRect().width + 16 : track.clientWidth;
+  }
+
+  prev.addEventListener('click', function(){
+    track.scrollBy({left: -slideSize(), behavior: 'smooth'});
+  });
+
+  next.addEventListener('click', function(){
+    track.scrollBy({left: slideSize(), behavior: 'smooth'});
   });
 });
 </script>
