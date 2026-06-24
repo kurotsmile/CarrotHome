@@ -93,11 +93,17 @@ include 'includes/header.php';
     </div>
 
     <div class="app-detail-info">
-      <p class="eyebrow"><?= h($app['type'] ?? 'app') ?></p>
       <h2><?= h($app_name) ?></h2>
-      <p class="subtitle"><?= h($app['category'] ?? '') ?></p>
       <div class="app-meta">
-        <span class="badge"><?= h($app['status'] ?? '') ?></span>
+        <?php if (!empty($app['type'])): ?>
+          <span class="badge"><?= h($app['type']) ?></span>
+        <?php endif; ?>
+        <?php if (!empty($app['category'])): ?>
+          <span class="badge"><?= h($app['category']) ?></span>
+        <?php endif; ?>
+        <?php if (!empty($app['status'])): ?>
+          <span class="badge"><?= h($app['status']) ?></span>
+        <?php endif; ?>
         <?php if (!empty($app['created_at'])): ?>
           <?php $createdDate = date('Y-m-d', strtotime((string)$app['created_at'])); ?>
           <span class="badge"><?= h($createdDate) ?></span>
