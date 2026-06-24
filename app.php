@@ -11,6 +11,7 @@ $slug = trim($_GET['slug'] ?? '');
 $slug_candidates = slug_lookup_candidates($slug);
 $app = null;
 $images = [];
+$app_content_html = '';
 $error_message = $db_error ?? '';
 $paypal_config = file_exists(__DIR__ . '/config/paypal.php') ? require __DIR__ . '/config/paypal.php' : [];
 
@@ -50,6 +51,20 @@ if ($pdo) {
                 unset($query['slug']);
                 header('Location: ' . $canonical_path . (count($query) ? '?' . http_build_query($query) : ''), true, 301);
                 exit;
+            }
+
+            try {
+                $contentStmt = $pdo->prepare('SELECT content_html FROM app_content WHERE app_id = :slug AND lang_key = :lang_key LIMIT 1');
+                $contentStmt->execute([
+                    ':slug' => $slug,
+                    ':lang_key' => current_lang_key(),
+                ]);
+                $contentHtml = $contentStmt->fetchColumn();
+                if ($contentHtml !== false && trim((string) $contentHtml) !== '') {
+                    $app_content_html = (string) $contentHtml;
+                }
+            } catch (Throwable $contentError) {
+                $app_content_html = '';
             }
 
             try {
@@ -160,9 +175,9 @@ include 'includes/header.php';
         </section>
       <?php endif; ?>
 
-      <?php if (!empty($app['decription'])): ?>
+      <?php if ($app_content_html !== '' || !empty($app['decription'])): ?>
         <div class="app-description">
-          <?= nl2br(h($app['decription'])) ?>
+          <?= $app_content_html !== '' ? $app_content_html : nl2br(h($app['decription'])) ?>
         </div>
       <?php endif; ?>
 
