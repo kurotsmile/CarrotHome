@@ -11,6 +11,7 @@ $slug = trim($_GET['slug'] ?? '');
 $slug_candidates = slug_lookup_candidates($slug);
 $app = null;
 $images = [];
+$same_type_apps = [];
 $app_content_html = '';
 $error_message = $db_error ?? '';
 $paypal_config = file_exists(__DIR__ . '/config/paypal.php') ? require __DIR__ . '/config/paypal.php' : [];
@@ -73,6 +74,25 @@ if ($pdo) {
                 $images = $photoStmt->fetchAll();
             } catch (Throwable $photoError) {
                 $images = [];
+            }
+
+            if (!empty($app['type'])) {
+                try {
+                    $sameTypeStmt = $pdo->prepare("SELECT id, id AS slug, decription, github, microsoft_store, icon, itch, exe_file, ipa_file, deb_file,
+                                   amazon_app_store, huawei_store, youtube_link, google_play, dmg_file, uptodown,
+                                   simmer, type, apk_file, status, priority, price, category, created_at
+                            FROM app
+                            WHERE type = :type AND id != :slug AND status != 'trash'
+                            ORDER BY RAND()
+                            LIMIT 8");
+                    $sameTypeStmt->execute([
+                        ':type' => $app['type'],
+                        ':slug' => $slug,
+                    ]);
+                    $same_type_apps = $sameTypeStmt->fetchAll();
+                } catch (Throwable $sameTypeError) {
+                    $same_type_apps = [];
+                }
             }
         }
     } catch (Throwable $e) {
@@ -232,6 +252,45 @@ include 'includes/header.php';
       </aside>
     <?php endif; ?>
   </div>
+
+  <?php if (count($same_type_apps)): ?>
+    <section class="same-type-section" aria-labelledby="same-type-heading">
+      <div class="same-type-header">
+        <h3 id="same-type-heading"><?= h(ui_label('section.same_type', 'Same Type')) ?></h3>
+        <a href="index.php?type=<?= urlencode($app['type'] ?? '') ?>"><?= h(ui_label('action.view_all', 'View all')) ?></a>
+      </div>
+      <ol class="same-type-slider">
+        <?php foreach ($same_type_apps as $same_app): ?>
+          <?php
+            $same_name = $same_app['id'];
+            $same_slug = $same_app['slug'] ?? $same_app['id'];
+            $same_icon = app_card_icon($same_app);
+            $same_downloads = app_download_links($same_app);
+          ?>
+          <li class="same-type-item">
+            <div class="same-type-card">
+              <figure class="same-type-image">
+                <img src="<?= h($same_icon) ?>" alt="<?= h($same_name) ?>" loading="lazy">
+              </figure>
+              <a class="same-type-link" href="<?= h(app_url($same_slug)) ?>" aria-label="<?= h(ui_label('aria.view_app', 'View')) ?> <?= h($same_name) ?>"></a>
+              <div class="same-type-overlay">
+                <?php foreach ($same_downloads as $key => $url): ?>
+                  <a href="<?= h($url) ?>" target="_blank" rel="noopener noreferrer" class="download-chip" aria-label="<?= h(label_name($key)) ?>" title="<?= h(label_name($key)) ?>">
+                    <?= download_icon($key) ?>
+                    <span><?= h(short_label($key)) ?></span>
+                  </a>
+                <?php endforeach; ?>
+              </div>
+            </div>
+            <div class="same-type-meta">
+              <?= type_icon($same_app['type'] ?? 'app') ?>
+              <span><?= h($same_name) ?></span>
+            </div>
+          </li>
+        <?php endforeach; ?>
+      </ol>
+    </section>
+  <?php endif; ?>
 </section>
 
 <script src="responsive-lightbox-slider-web/js/imagesSlider.js?v=<?= (int) $slider_script_version ?>"></script>
