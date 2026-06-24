@@ -69,7 +69,7 @@ if ($pdo) {
             }
 
             try {
-                $photoStmt = $pdo->prepare('SELECT image_url FROM app_photo WHERE app_id = :slug ORDER BY sort_order ASC, id ASC');
+                $photoStmt = $pdo->prepare('SELECT image_url, display_mode FROM app_photo WHERE app_id = :slug ORDER BY sort_order ASC, id ASC');
                 $photoStmt->execute([':slug' => $slug]);
                 $images = $photoStmt->fetchAll();
             } catch (Throwable $photoError) {
@@ -189,7 +189,8 @@ include 'includes/header.php';
           <?php foreach (array_values($images) as $image): ?>
             <?php $imageUrl = trim((string) ($image['image_url'] ?? '')); ?>
             <?php if ($imageUrl !== ''): ?>
-              <img src="<?= h(asset_url($imageUrl)) ?>" alt="<?= h($app_name) ?> screenshot" loading="lazy">
+              <?php $displayMode = (($image['display_mode'] ?? 'vertical') === 'horizontal') ? 'horizontal' : 'vertical'; ?>
+              <img class="<?= $displayMode === 'horizontal' ? 'app-photo-horizontal' : 'app-photo-vertical' ?>" src="<?= h(asset_url($imageUrl)) ?>" alt="<?= h($app_name) ?> screenshot" loading="lazy">
             <?php endif; ?>
           <?php endforeach; ?>
         </section>
