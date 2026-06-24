@@ -44,7 +44,7 @@ if ($pdo) {
     try {
         $stmt = $pdo->query("SELECT id, created_at FROM app WHERE status != 'trash' ORDER BY priority DESC, created_at DESC");
         foreach ($stmt->fetchAll() as $app) {
-            sitemap_xml_url(sitemap_url(urlencode($app['id'])), $app['created_at'], 'weekly', '0.8');
+            sitemap_xml_url(sitemap_site_url() . app_url($app['id']), $app['created_at'], 'weekly', '0.8');
         }
 
         $page_stmt = $pdo->query("SELECT slug, lang, updated_at, created_at FROM page ORDER BY updated_at DESC, created_at DESC");

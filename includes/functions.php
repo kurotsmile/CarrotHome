@@ -56,14 +56,40 @@ function base_url($path = '') {
     return '/' . $path;
 }
 
+function seo_slug_text($slug) {
+    $slug = trim((string)$slug);
+    return preg_replace('/\s+/u', '-', $slug);
+}
+
+function seo_slug_encode($slug) {
+    return rawurlencode(seo_slug_text($slug));
+}
+
+function slug_lookup_candidates($slug) {
+    $decoded = trim(rawurldecode((string)$slug));
+    $candidates = [$decoded];
+
+    if (strpos($decoded, '+') !== false) {
+        $candidates[] = str_replace('+', ' ', $decoded);
+    }
+
+    if (strpos($decoded, '-') !== false) {
+        $candidates[] = str_replace('-', ' ', $decoded);
+    }
+
+    return array_values(array_unique(array_filter($candidates, static function ($value) {
+        return trim((string)$value) !== '';
+    })));
+}
+
 function app_url($slug) {
-    return base_url(urlencode((string)$slug));
+    return base_url(seo_slug_encode($slug));
 }
 
 function page_url($slug, $lang = '') {
-    $query = 'page=' . urlencode((string)$slug);
+    $query = 'page=' . seo_slug_encode($slug);
     if ((string)$lang !== '') {
-        $query .= '&lang=' . urlencode((string)$lang);
+        $query .= '&lang=' . rawurlencode((string)$lang);
     }
     return base_url('index.php?' . $query);
 }

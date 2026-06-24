@@ -8,12 +8,13 @@ require_once 'includes/visit_tracker.php';
 visit_track_daily_ip($pdo ?? null);
 
 $slug = trim($_GET['slug'] ?? '');
+$slug_candidates = slug_lookup_candidates($slug);
 $app = null;
 $images = [];
 $error_message = $db_error ?? '';
 $paypal_config = file_exists(__DIR__ . '/config/paypal.php') ? require __DIR__ . '/config/paypal.php' : [];
 
-if (!$slug) {
+if (!$slug_candidates) {
     http_response_code(404);
     $page_title = ui_label('meta.app_not_found_title', 'App not found - CarrotHome');
     $page_description = ui_label('meta.app_not_found_description', 'The requested app was not found.');
@@ -25,10 +26,32 @@ if (!$slug) {
 
 if ($pdo) {
     try {
-        $stmt = $pdo->prepare("SELECT * FROM app WHERE id = :slug AND status != 'trash' LIMIT 1");
-        $stmt->execute([':slug' => $slug]);
+        $placeholders = [];
+        $order_cases = [];
+        $params = [];
+        foreach ($slug_candidates as $index => $candidate) {
+            $key = ':slug' . $index;
+            $order_key = ':slug_order' . $index;
+            $placeholders[] = $key;
+            $order_cases[] = 'WHEN ' . $order_key . ' THEN ' . $index;
+            $params[$key] = $candidate;
+            $params[$order_key] = $candidate;
+        }
+
+        $stmt = $pdo->prepare("SELECT * FROM app WHERE id IN (" . implode(',', $placeholders) . ") AND status != 'trash' ORDER BY CASE id " . implode(' ', $order_cases) . " ELSE 999 END LIMIT 1");
+        $stmt->execute($params);
         $app = $stmt->fetch();
         if ($app) {
+            $slug = $app['id'];
+            $canonical_path = app_url($slug);
+            $request_path = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?: '';
+            if ($request_path !== '' && basename($request_path) !== 'app.php' && $request_path !== $canonical_path) {
+                $query = $_GET;
+                unset($query['slug']);
+                header('Location: ' . $canonical_path . (count($query) ? '?' . http_build_query($query) : ''), true, 301);
+                exit;
+            }
+
             try {
                 $photoStmt = $pdo->prepare('SELECT image_url FROM app_photo WHERE app_id = :slug ORDER BY sort_order ASC, id ASC');
                 $photoStmt->execute([':slug' => $slug]);

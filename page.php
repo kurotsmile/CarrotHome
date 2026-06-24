@@ -10,11 +10,12 @@ require_once __DIR__ . '/includes/visit_tracker.php';
 visit_track_daily_ip($pdo ?? null);
 
 $slug = trim($_GET['page'] ?? ($_GET['slug'] ?? ''));
+$slug_candidates = slug_lookup_candidates($slug);
 $page_lang = trim($_GET['lang'] ?? ($_SESSION['key_lang'] ?? 'en'));
 $page = null;
 $error_message = $db_error ?? '';
 
-if ($slug === '') {
+if (!$slug_candidates) {
     http_response_code(404);
     $page_title = ui_label('meta.page_not_found_title', 'Page not found - CarrotHome');
     $page_description = ui_label('meta.page_not_found_description', 'The requested page was not found.');
@@ -26,20 +27,40 @@ if ($slug === '') {
 
 if ($pdo) {
     try {
+        $placeholders = [];
+        $order_cases = [];
+        $params = [
+            ':lang_filter' => $page_lang,
+            ':lang_order' => $page_lang,
+        ];
+        foreach ($slug_candidates as $index => $candidate) {
+            $key = ':slug' . $index;
+            $order_key = ':slug_order' . $index;
+            $placeholders[] = $key;
+            $order_cases[] = 'WHEN ' . $order_key . ' THEN ' . $index;
+            $params[$key] = $candidate;
+            $params[$order_key] = $candidate;
+        }
+
         $stmt = $pdo->prepare("
             SELECT *
             FROM page
-            WHERE slug = :slug
+            WHERE slug IN (" . implode(',', $placeholders) . ")
               AND (lang = :lang_filter OR lang = '' OR lang IS NULL)
-            ORDER BY CASE WHEN lang = :lang_order THEN 0 ELSE 1 END
+            ORDER BY CASE slug " . implode(' ', $order_cases) . " ELSE 999 END, CASE WHEN lang = :lang_order THEN 0 ELSE 1 END
             LIMIT 1
         ");
-        $stmt->execute([
-            ':slug' => $slug,
-            ':lang_filter' => $page_lang,
-            ':lang_order' => $page_lang,
-        ]);
+        $stmt->execute($params);
         $page = $stmt->fetch();
+        if ($page && isset($_GET['page'])) {
+            $canonical_page_slug = seo_slug_text($page['slug']);
+            if ((string)$_GET['page'] !== $canonical_page_slug) {
+                $query = $_GET;
+                $query['page'] = $canonical_page_slug;
+                header('Location: ' . base_url('index.php?' . http_build_query($query)), true, 301);
+                exit;
+            }
+        }
     } catch (Throwable $e) {
         $error_message = $e->getMessage();
     }

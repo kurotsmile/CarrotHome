@@ -33,7 +33,7 @@ $footer_page_columns = [
         <div class="footer-column">
           <h2><?= h(ui_label($column_key, $column_key === 'footer.company' ? 'Company' : 'Legal')) ?></h2>
           <?php foreach ($links as $slug => [$label_key, $label_default]): ?>
-            <a href="<?= h(base_url('index.php?page=' . urlencode($slug))) ?>"><?= h(ui_label($label_key, $label_default)) ?></a>
+            <a href="<?= h(page_url($slug)) ?>"><?= h(ui_label($label_key, $label_default)) ?></a>
           <?php endforeach; ?>
         </div>
       <?php endforeach; ?>
