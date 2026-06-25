@@ -41,7 +41,7 @@ $footer_page_columns = [
   </div>
 
   <div class="container footer-bottom">
-    <span>© <?php echo date('Y'); ?> CarrotHome. All rights reserved.</span>
+    <span>© <?php echo date('Y'); ?> <?= h(ui_label('footer.copyright', 'Carrot28. All rights reserved.')) ?></span>
     <span><?= h(ui_label('footer.built_for_discovery', 'Built for simple app discovery.')) ?></span>
   </div>
 </footer>
