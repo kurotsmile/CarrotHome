@@ -12,6 +12,11 @@ $current_key_lang = trim((string)($_SESSION['key_lang'] ?? ''));
 $current_country_id = (int)($_SESSION['country_id'] ?? 0);
 $current_country = null;
 
+initialize_language_from_ip($pdo ?? null);
+
+$current_key_lang = trim((string)($_SESSION['key_lang'] ?? ''));
+$current_country_id = (int)($_SESSION['country_id'] ?? 0);
+
 if (isset($pdo) && $pdo instanceof PDO) {
     try {
         $country_stmt = $pdo->query("SELECT id, icon, name, lang_key, lang_country FROM country ORDER BY name ASC");

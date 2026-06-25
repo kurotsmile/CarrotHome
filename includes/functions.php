@@ -3,10 +3,143 @@ function h($value) {
     return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
 }
 
+function initialize_language_from_ip($pdo = null) {
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+
+    if (trim((string)($_SESSION['key_lang'] ?? '')) !== '') {
+        return;
+    }
+
+    if (!$pdo instanceof PDO) {
+        return;
+    }
+
+    if (!empty($_SESSION['auto_lang_checked'])) {
+        return;
+    }
+
+    $_SESSION['auto_lang_checked'] = 1;
+
+    $country_code = '';
+    $header_keys = [
+        'HTTP_CF_IPCOUNTRY',
+        'HTTP_X_VERCEL_IP_COUNTRY',
+        'HTTP_CLOUDFRONT_VIEWER_COUNTRY',
+        'HTTP_X_APPENGINE_COUNTRY',
+        'GEOIP_COUNTRY_CODE',
+    ];
+
+    foreach ($header_keys as $key) {
+        $value = strtoupper(trim((string)($_SERVER[$key] ?? '')));
+        if (preg_match('/^[A-Z]{2}$/', $value) && $value !== 'XX') {
+            $country_code = $value;
+            break;
+        }
+    }
+
+    if ($country_code === '') {
+        $ip = '';
+        $ip_keys = [
+            'HTTP_CF_CONNECTING_IP',
+            'HTTP_X_REAL_IP',
+            'HTTP_CLIENT_IP',
+            'HTTP_X_FORWARDED_FOR',
+            'REMOTE_ADDR',
+        ];
+
+        foreach ($ip_keys as $key) {
+            $value = trim((string)($_SERVER[$key] ?? ''));
+            if ($value === '') {
+                continue;
+            }
+
+            foreach (explode(',', $value) as $part) {
+                $candidate_ip = trim($part);
+                if (filter_var($candidate_ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+                    $ip = $candidate_ip;
+                    break 2;
+                }
+            }
+        }
+
+        if ($ip !== '') {
+            $url = 'https://ipapi.co/' . rawurlencode($ip) . '/country/';
+            $response = '';
+
+            if (function_exists('curl_init')) {
+                $ch = curl_init($url);
+                curl_setopt_array($ch, [
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_CONNECTTIMEOUT => 1,
+                    CURLOPT_TIMEOUT => 2,
+                    CURLOPT_USERAGENT => 'CarrotHome/1.0',
+                ]);
+                $response = (string)curl_exec($ch);
+                $status = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                curl_close($ch);
+
+                if ($status >= 400) {
+                    $response = '';
+                }
+            } elseif (ini_get('allow_url_fopen')) {
+                $context = stream_context_create([
+                    'http' => [
+                        'timeout' => 2,
+                        'header' => "User-Agent: CarrotHome/1.0\r\n",
+                    ],
+                ]);
+                $response = (string)@file_get_contents($url, false, $context);
+            }
+
+            $country_code = strtoupper(trim($response));
+            if (!preg_match('/^[A-Z]{2}$/', $country_code)) {
+                $country_code = '';
+            }
+        }
+    }
+
+    $country_code = strtolower(trim((string)$country_code));
+    if ($country_code === '') {
+        return;
+    }
+
+    $stmt = $pdo->prepare('SELECT id, lang_key, lang_country FROM country WHERE LOWER(lang_country) = :country_code LIMIT 1');
+    $stmt->execute([':country_code' => $country_code]);
+    $country = $stmt->fetch();
+    if (!$country) {
+        $country_lang_map = [
+            'ae' => 'ar', 'br' => 'pt', 'cn' => 'zh', 'de' => 'de', 'es' => 'es',
+            'fr' => 'fr', 'gb' => 'en', 'id' => 'id', 'in' => 'hi', 'it' => 'it',
+            'jp' => 'ja', 'kr' => 'ko', 'mx' => 'es', 'nl' => 'nl', 'ph' => 'en',
+            'pt' => 'pt', 'ru' => 'ru', 'sa' => 'ar', 'th' => 'th', 'tr' => 'tr',
+            'tw' => 'zh', 'us' => 'en', 'vn' => 'vi',
+        ];
+        $lang_key = $country_lang_map[$country_code] ?? '';
+
+        if ($lang_key !== '') {
+            $stmt = $pdo->prepare('SELECT id, lang_key, lang_country FROM country WHERE lang_key = :lang_key ORDER BY id ASC LIMIT 1');
+            $stmt->execute([':lang_key' => $lang_key]);
+            $country = $stmt->fetch();
+        }
+    }
+
+    if (!$country) {
+        return;
+    }
+
+    $_SESSION['key_lang'] = $country['lang_key'];
+    $_SESSION['country_id'] = (int)$country['id'];
+    $_SESSION['lang_country'] = $country['lang_country'];
+}
+
 function current_lang_key() {
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
     }
+
+    initialize_language_from_ip($GLOBALS['pdo'] ?? null);
 
     return trim((string)($_SESSION['key_lang'] ?? 'en')) ?: 'en';
 }

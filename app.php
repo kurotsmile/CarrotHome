@@ -6,6 +6,8 @@ require_once 'includes/functions.php';
 require_once 'includes/paypal_config.php';
 require_once 'includes/visit_tracker.php';
 
+initialize_language_from_ip($pdo ?? null);
+
 visit_track_daily_ip($pdo ?? null);
 
 $slug = trim($_GET['slug'] ?? '');
