@@ -3,6 +3,7 @@ session_start();
 
 require_once 'config/database.php';
 require_once 'includes/functions.php';
+require_once 'includes/paypal_config.php';
 require_once 'includes/visit_tracker.php';
 
 visit_track_daily_ip($pdo ?? null);
@@ -14,7 +15,7 @@ $images = [];
 $same_type_apps = [];
 $app_content_html = '';
 $error_message = $db_error ?? '';
-$paypal_config = file_exists(__DIR__ . '/config/paypal.php') ? require __DIR__ . '/config/paypal.php' : [];
+$paypal_config = paypal_config_from_db($pdo ?? null, 'home');
 
 if (!$slug_candidates) {
     http_response_code(404);

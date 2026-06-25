@@ -3,8 +3,9 @@ session_start();
 
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/includes/functions.php';
+require_once __DIR__ . '/includes/paypal_config.php';
 
-$paypal_config = require __DIR__ . '/config/paypal.php';
+$paypal_config = paypal_config_from_db($pdo ?? null, 'home');
 $slug = trim($_GET['slug'] ?? '');
 
 if ($slug === '' || empty($paypal_config['enabled'])) {
