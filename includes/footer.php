@@ -52,12 +52,16 @@ $footer_page_columns = [
   <button class="floating-share-tool floating-share-tool--qr" type="button" aria-label="<?= h(ui_label('action.show_qr', 'Show QR code')) ?>" title="<?= h(ui_label('action.show_qr', 'QR code')) ?>">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h6v6H4V4Zm10 0h6v6h-6V4ZM4 14h6v6H4v-6Zm10 0h2v2h-2v-2Zm4 0h2v2h-2v-2Zm-4 4h2v2h-2v-2Zm4 0h2v2h-2v-2Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
   </button>
+  <button class="floating-share-tool floating-share-tool--mail" type="button" aria-label="<?= h(ui_label('action.send_mail', 'Send mail')) ?>" title="<?= h(ui_label('action.send_mail', 'Send mail')) ?>">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v12H4V6Zm0 0 8 7 8-7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   var shareButton = document.querySelector('.floating-share-tool--share');
   var qrButton = document.querySelector('.floating-share-tool--qr');
+  var mailButton = document.querySelector('.floating-share-tool--mail');
 
   function currentUrl() {
     return window.location.href;
@@ -91,6 +95,15 @@ document.addEventListener('DOMContentLoaded', function () {
       } else {
         window.open(qrUrl, '_blank', 'noopener,noreferrer');
       }
+    });
+  }
+
+  if (mailButton) {
+    mailButton.addEventListener('click', function () {
+      var shareUrl = currentUrl();
+      var subject = encodeURIComponent(document.title || 'CarrotHome');
+      var body = encodeURIComponent(shareUrl);
+      window.location.href = 'mailto:?subject=' + subject + '&body=' + body;
     });
   }
 });
