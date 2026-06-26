@@ -355,6 +355,10 @@ input:focus,select:focus{box-shadow:0 0 0 3px rgba(255,89,0,.16)}
 .floating-share-tool{display:flex;align-items:center;justify-content:center;width:48px;height:48px;border:0;border-radius:0;background:var(--accent);color:#fff;cursor:pointer;transition:background .18s ease,color .18s ease}
 .floating-share-tool:first-child{border-top-right-radius:8px}
 .floating-share-tool:last-child{border-bottom-right-radius:8px}
+.floating-share-tool--share{background:#ffc928}
+.floating-share-tool--qr{background:#ff9f1c}
+.floating-share-tool--mail{background:#ff6b1a}
+.floating-share-tool--top{background:#e6392e}
 .floating-share-tool svg{display:block;width:22px;height:22px}
 .floating-share-tool:hover,.floating-share-tool.is-copied{background:#b9ff2f;color:#111}
 .qr-popup{display:grid;gap:12px;justify-items:center}

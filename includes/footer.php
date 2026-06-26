@@ -55,6 +55,9 @@ $footer_page_columns = [
   <button class="floating-share-tool floating-share-tool--mail" type="button" aria-label="<?= h(ui_label('action.send_mail', 'Send mail')) ?>" title="<?= h(ui_label('action.send_mail', 'Send mail')) ?>">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v12H4V6Zm0 0 8 7 8-7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
   </button>
+  <button class="floating-share-tool floating-share-tool--top" type="button" aria-label="<?= h(ui_label('action.scroll_top', 'Scroll to top')) ?>" title="<?= h(ui_label('action.scroll_top', 'Scroll to top')) ?>">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6M12 9v12M5 3h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
@@ -62,6 +65,7 @@ document.addEventListener('DOMContentLoaded', function () {
   var shareButton = document.querySelector('.floating-share-tool--share');
   var qrButton = document.querySelector('.floating-share-tool--qr');
   var mailButton = document.querySelector('.floating-share-tool--mail');
+  var topButton = document.querySelector('.floating-share-tool--top');
 
   function currentUrl() {
     return window.location.href;
@@ -104,6 +108,12 @@ document.addEventListener('DOMContentLoaded', function () {
       var subject = encodeURIComponent(document.title || 'CarrotHome');
       var body = encodeURIComponent(shareUrl);
       window.location.href = 'mailto:?subject=' + subject + '&body=' + body;
+    });
+  }
+
+  if (topButton) {
+    topButton.addEventListener('click', function () {
+      window.scrollTo({top: 0, behavior: 'smooth'});
     });
   }
 });
