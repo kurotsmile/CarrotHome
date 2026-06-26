@@ -134,7 +134,6 @@ $stores = app_store_links($app);
 $videos = app_video_links($app);
 $github_url = trim((string)($app['github'] ?? ''));
 $has_paid_github = !empty($_SESSION['paid_github_apps'][$app_name]);
-$share_url = ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? 'home.carrot28.com') . app_url($app_name);
 $source_price = trim((string)($app['price'] ?? ''));
 if ($source_price === '' || (float)$source_price <= 0) {
     $source_price = trim((string)($paypal_config['amount'] ?? ''));
@@ -173,10 +172,6 @@ include 'includes/header.php';
         <?php endif; ?>
       </div>
       <div class="app-hero-actions">
-        <button class="share-button" type="button" data-share-url="<?= h($share_url) ?>" data-share-title="<?= h($app_name) ?>">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 8a3 3 0 1 0-2.8-4M8 12l8-4M8 12l8 4M8 12a3 3 0 1 1-3-3 3 3 0 0 1 3 3Zm11 7a3 3 0 1 1-3-3 3 3 0 0 1 3 3Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          <span><?= h(ui_label('action.share', 'Share')) ?></span>
-        </button>
         <?php foreach ($stores as $key => $url): ?>
           <a class="store-action" href="<?= h($url) ?>" target="_blank" rel="noopener noreferrer">
             <?= store_icon($key) ?>
@@ -300,22 +295,5 @@ include 'includes/header.php';
 </section>
 
 <script src="responsive-lightbox-slider-web/js/imagesSlider.js?v=<?= (int) $slider_script_version ?>"></script>
-<script>
-document.querySelectorAll('.share-button').forEach(function(button){
-  button.addEventListener('click', function(){
-    var shareUrl = button.getAttribute('data-share-url');
-    var shareTitle = button.getAttribute('data-share-title');
-    if (navigator.share) {
-      navigator.share({title: shareTitle, url: shareUrl});
-      return;
-    }
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(shareUrl);
-      button.classList.add('is-copied');
-      setTimeout(function(){ button.classList.remove('is-copied'); }, 1600);
-    }
-  });
-});
-</script>
 
 <?php include 'includes/footer.php'; ?>
