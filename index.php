@@ -11,6 +11,42 @@ if (isset($_GET['page'])) {
     exit;
 }
 
+if (isset($_GET['slug'])) {
+    $slug = trim((string)$_GET['slug']);
+    $slug_candidates = slug_lookup_candidates($slug);
+    $page_lang = trim((string)($_GET['lang'] ?? ($_SESSION['key_lang'] ?? 'en')));
+    $is_page_slug = false;
+
+    if ($pdo && $slug_candidates) {
+        try {
+            $placeholders = [];
+            $params = [
+                ':lang_filter' => $page_lang,
+            ];
+            foreach ($slug_candidates as $index => $candidate) {
+                $key = ':slug' . $index;
+                $placeholders[] = $key;
+                $params[$key] = $candidate;
+            }
+
+            $stmt = $pdo->prepare("
+                SELECT 1
+                FROM page
+                WHERE slug IN (" . implode(',', $placeholders) . ")
+                  AND (lang = :lang_filter OR lang = '' OR lang IS NULL)
+                LIMIT 1
+            ");
+            $stmt->execute($params);
+            $is_page_slug = (bool)$stmt->fetchColumn();
+        } catch (Throwable $e) {
+            $is_page_slug = false;
+        }
+    }
+
+    include __DIR__ . ($is_page_slug ? '/page.php' : '/app.php');
+    exit;
+}
+
 visit_track_daily_ip($pdo ?? null);
 
 $apps = [];

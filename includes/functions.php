@@ -220,11 +220,11 @@ function app_url($slug) {
 }
 
 function page_url($slug, $lang = '') {
-    $query = 'page=' . seo_slug_encode($slug);
+    $url = base_url(seo_slug_encode($slug));
     if ((string)$lang !== '') {
-        $query .= '&lang=' . rawurlencode((string)$lang);
+        $url .= '?lang=' . rawurlencode((string)$lang);
     }
-    return base_url('index.php?' . $query);
+    return $url;
 }
 
 function app_icon($icon) {

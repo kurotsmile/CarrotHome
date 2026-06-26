@@ -5,4 +5,4 @@ RewriteRule ^sitemap\.xml$ sitemap.php [L]
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_URI} !^/(index|app|page|sitemap|adminer)\.php
-RewriteRule ^(.+)$ app.php?slug=$1 [QSA,L]
+RewriteRule ^(.+)$ index.php?slug=$1 [QSA,L]

@@ -54,12 +54,19 @@ if ($pdo) {
         ");
         $stmt->execute($params);
         $page = $stmt->fetch();
-        if ($page && isset($_GET['page'])) {
+        if ($page) {
             $canonical_page_slug = seo_slug_text($page['slug']);
-            if ((string)$_GET['page'] !== $canonical_page_slug) {
-                $query = $_GET;
-                $query['page'] = $canonical_page_slug;
-                header('Location: ' . base_url('index.php?' . http_build_query($query)), true, 301);
+            $canonical_path = page_url($canonical_page_slug);
+            $request_path = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?: '';
+            $query = $_GET;
+            unset($query['slug'], $query['page']);
+
+            if ($request_path !== $canonical_path || isset($_GET['page']) || (string)$slug !== $canonical_page_slug) {
+                if (trim((string)($page['lang'] ?? '')) !== '') {
+                    $query['lang'] = (string)$page['lang'];
+                }
+
+                header('Location: ' . $canonical_path . (count($query) ? '?' . http_build_query($query) : ''), true, 301);
                 exit;
             }
         }
