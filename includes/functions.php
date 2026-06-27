@@ -378,6 +378,11 @@ function app_card_icon($app) {
     return app_icon($app['icon'] ?? '');
 }
 
+function app_display_title($app) {
+    $title = trim((string)($app['app_content_title'] ?? ''));
+    return $title !== '' ? $title : (string)($app['id'] ?? '');
+}
+
 function category_display_title($category) {
     $title = trim((string)($category['title'] ?? ''));
     return $title !== '' ? $title : (string)($category['category_id'] ?? '');

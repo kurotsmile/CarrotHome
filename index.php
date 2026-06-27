@@ -61,40 +61,52 @@ if ($pdo) {
     try {
         $where = [];
         $params = [];
+        $lang_key = current_lang_key();
+        $params[':lang_key'] = $lang_key;
 
         if ($status === '') {
             $status = 'public';
         }
 
         if ($status !== 'all') {
-            $where[] = 'status = :status';
+            $where[] = 'a.status = :status';
             $params[':status'] = $status;
         }
 
         if ($type !== 'all' && $type !== '') {
-            $where[] = 'type = :type';
+            $where[] = 'a.type = :type';
             $params[':type'] = $type;
         }
 
         if ($search !== '') {
             $search_value = '%' . $search . '%';
-            $where[] = '(id LIKE :search_id OR decription LIKE :search_description)';
+            $where[] = '(a.id LIKE :search_id OR a.decription LIKE :search_description OR ac.title LIKE :search_title)';
             $params[':search_id'] = $search_value;
             $params[':search_description'] = $search_value;
+            $params[':search_title'] = $search_value;
         }
 
         $where_sql = count($where) ? 'WHERE ' . implode(' AND ', $where) : '';
 
-        $count_stmt = $pdo->prepare("SELECT COUNT(*) FROM app {$where_sql}");
+        $count_stmt = $pdo->prepare("
+            SELECT COUNT(DISTINCT a.id)
+            FROM app a
+            LEFT JOIN app_content ac
+              ON ac.app_id = a.id AND ac.lang_key = :lang_key
+            {$where_sql}
+        ");
         $count_stmt->execute($params);
         $total_apps = (int)$count_stmt->fetchColumn();
 
-        $sql = "SELECT id, id AS slug, decription, github, microsoft_store, icon, itch, exe_file, ipa_file, deb_file,
-                       amazon_app_store, huawei_store, youtube_link, google_play, dmg_file, uptodown,
-                       simmer, type, apk_file, status, priority, price, category, created_at
-                FROM app
+        $sql = "SELECT a.id, a.id AS slug, a.decription, a.github, a.microsoft_store, a.icon, a.itch, a.exe_file, a.ipa_file, a.deb_file,
+                       a.amazon_app_store, a.huawei_store, a.youtube_link, a.google_play, a.dmg_file, a.uptodown,
+                       a.simmer, a.type, a.apk_file, a.status, a.priority, a.price, a.category, a.created_at,
+                       ac.title AS app_content_title
+                FROM app a
+                LEFT JOIN app_content ac
+                  ON ac.app_id = a.id AND ac.lang_key = :lang_key
                 {$where_sql}
-                ORDER BY priority DESC, created_at DESC, id ASC
+                ORDER BY a.priority DESC, a.created_at DESC, a.id ASC
                 LIMIT 120";
 
         $stmt = $pdo->prepare($sql);
@@ -132,7 +144,7 @@ include __DIR__ . '/includes/header.php';
 <ol class="shots-grid">
   <?php foreach ($apps as $app): ?>
     <?php
-      $name = $app['id'];
+      $name = app_display_title($app);
       $slug = $app['slug'] ?? $app['id'];
       $icon = app_card_icon($app);
       $downloads = app_download_links($app);

@@ -79,6 +79,7 @@ if ($pdo) {
                     $contentHtml = trim((string) ($content['content_html'] ?? ''));
                     if ($contentTitle !== '') {
                         $app_content_title = $contentTitle;
+                        $app['app_content_title'] = $contentTitle;
                     }
                     if ($contentHtml !== '') {
                         $app_content_html = (string) ($content['content_html'] ?? '');
@@ -99,14 +100,18 @@ if ($pdo) {
 
             if (!empty($app['type'])) {
                 try {
-                    $sameTypeStmt = $pdo->prepare("SELECT id, id AS slug, decription, github, microsoft_store, icon, itch, exe_file, ipa_file, deb_file,
-                                   amazon_app_store, huawei_store, youtube_link, google_play, dmg_file, uptodown,
-                                   simmer, type, apk_file, status, priority, price, category, created_at
-                            FROM app
-                            WHERE type = :type AND id != :slug AND status != 'trash'
+                    $sameTypeStmt = $pdo->prepare("SELECT a.id, a.id AS slug, a.decription, a.github, a.microsoft_store, a.icon, a.itch, a.exe_file, a.ipa_file, a.deb_file,
+                                   a.amazon_app_store, a.huawei_store, a.youtube_link, a.google_play, a.dmg_file, a.uptodown,
+                                   a.simmer, a.type, a.apk_file, a.status, a.priority, a.price, a.category, a.created_at,
+                                   ac.title AS app_content_title
+                            FROM app a
+                            LEFT JOIN app_content ac
+                              ON ac.app_id = a.id AND ac.lang_key = :lang_key
+                            WHERE a.type = :type AND a.id != :slug AND a.status != 'trash'
                             ORDER BY RAND()
                             LIMIT 8");
                     $sameTypeStmt->execute([
+                        ':lang_key' => current_lang_key(),
                         ':type' => $app['type'],
                         ':slug' => $slug,
                     ]);
@@ -142,7 +147,10 @@ if ($error_message) {
 }
 
 $app_id = (string) ($app['id'] ?? 'App');
-$app_name = $app_content_title !== '' ? $app_content_title : $app_id;
+$app_name = app_display_title($app);
+if ($app_name === '') {
+    $app_name = $app_id;
+}
 $page_title = $app_name . ' - CarrotHome';
 $page_description = 'Download ' . $app_name . ' for Android, Windows, macOS, Linux and other platforms.';
 
@@ -280,7 +288,7 @@ include 'includes/header.php';
       <ol class="same-type-slider">
         <?php foreach ($same_type_apps as $same_app): ?>
           <?php
-            $same_name = $same_app['id'];
+            $same_name = app_display_title($same_app);
             $same_slug = $same_app['slug'] ?? $same_app['id'];
             $same_icon = app_card_icon($same_app);
             $same_downloads = app_download_links($same_app);

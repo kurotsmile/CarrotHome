@@ -63,14 +63,20 @@ if ($pdo) {
             $appStmt = $pdo->prepare("
                 SELECT a.id, a.id AS slug, a.decription, a.github, a.microsoft_store, a.icon, a.itch, a.exe_file, a.ipa_file, a.deb_file,
                        a.amazon_app_store, a.huawei_store, a.youtube_link, a.google_play, a.dmg_file, a.uptodown,
-                       a.simmer, a.type, a.apk_file, a.status, a.priority, a.price, a.category, a.created_at
+                       a.simmer, a.type, a.apk_file, a.status, a.priority, a.price, a.category, a.created_at,
+                       ac.title AS app_content_title
                 FROM app a
                 INNER JOIN category_app ca ON ca.app_id = a.id
+                LEFT JOIN app_content ac
+                  ON ac.app_id = a.id AND ac.lang_key = :lang_key
                 WHERE ca.category_id = :category_id AND a.status != 'trash'
                 ORDER BY a.priority DESC, a.created_at DESC, a.id ASC
                 LIMIT 120
             ");
-            $appStmt->execute([':category_id' => $selected_category_id]);
+            $appStmt->execute([
+                ':lang_key' => $lang_key,
+                ':category_id' => $selected_category_id,
+            ]);
             $apps = $appStmt->fetchAll();
         }
     } catch (Throwable $e) {
@@ -136,7 +142,7 @@ include __DIR__ . '/includes/header.php';
     <ol class="shots-grid">
       <?php foreach ($apps as $app): ?>
         <?php
-          $name = $app['id'];
+          $name = app_display_title($app);
           $slug = $app['slug'] ?? $app['id'];
           $icon = app_card_icon($app);
           $downloads = app_download_links($app);
