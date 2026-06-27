@@ -180,6 +180,7 @@ include 'includes/header.php';
     </div>
 
     <div class="app-detail-info">
+      <p class="eyebrow"><?= h(ui_label('label.app_id', 'App ID')) ?>: <?= h($app_id) ?></p>
       <h2><?= h($app_name) ?></h2>
       <div class="app-meta">
         <?php if (!empty($app['type'])): ?>
