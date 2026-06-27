@@ -18,6 +18,7 @@ $app = null;
 $images = [];
 $same_type_apps = [];
 $app_content_html = '';
+$app_content_title = '';
 $app_categories = [];
 $error_message = $db_error ?? '';
 $paypal_config = paypal_config_from_db($pdo ?? null, 'home');
@@ -67,17 +68,25 @@ if ($pdo) {
             }
 
             try {
-                $contentStmt = $pdo->prepare('SELECT content_html FROM app_content WHERE app_id = :slug AND lang_key = :lang_key LIMIT 1');
+                $contentStmt = $pdo->prepare('SELECT title, content_html FROM app_content WHERE app_id = :slug AND lang_key = :lang_key LIMIT 1');
                 $contentStmt->execute([
                     ':slug' => $slug,
                     ':lang_key' => current_lang_key(),
                 ]);
-                $contentHtml = $contentStmt->fetchColumn();
-                if ($contentHtml !== false && trim((string) $contentHtml) !== '') {
-                    $app_content_html = (string) $contentHtml;
+                $content = $contentStmt->fetch();
+                if ($content) {
+                    $contentTitle = trim((string) ($content['title'] ?? ''));
+                    $contentHtml = trim((string) ($content['content_html'] ?? ''));
+                    if ($contentTitle !== '') {
+                        $app_content_title = $contentTitle;
+                    }
+                    if ($contentHtml !== '') {
+                        $app_content_html = (string) ($content['content_html'] ?? '');
+                    }
                 }
             } catch (Throwable $contentError) {
                 $app_content_html = '';
+                $app_content_title = '';
             }
 
             try {
@@ -132,7 +141,8 @@ if ($error_message) {
     exit;
 }
 
-$app_name = $app['id'] ?? 'App';
+$app_id = (string) ($app['id'] ?? 'App');
+$app_name = $app_content_title !== '' ? $app_content_title : $app_id;
 $page_title = $app_name . ' - CarrotHome';
 $page_description = 'Download ' . $app_name . ' for Android, Windows, macOS, Linux and other platforms.';
 
@@ -140,7 +150,7 @@ $downloads = app_download_links($app);
 $stores = app_store_links($app);
 $videos = app_video_links($app);
 $github_url = trim((string)($app['github'] ?? ''));
-$has_paid_github = !empty($_SESSION['paid_github_apps'][$app_name]);
+$has_paid_github = !empty($_SESSION['paid_github_apps'][$app_id]);
 $source_price = trim((string)($app['price'] ?? ''));
 if ($source_price === '' || (float)$source_price <= 0) {
     $source_price = trim((string)($paypal_config['amount'] ?? ''));
@@ -250,7 +260,7 @@ include 'includes/header.php';
                 <span>GitHub</span>
               </a>
             <?php elseif (!empty($paypal_config['enabled']) && $source_price_label !== ''): ?>
-              <a class="source-promo__button source-promo__button--paypal" href="<?= h(base_url('paypal-create.php?slug=' . urlencode($app_name))) ?>">
+              <a class="source-promo__button source-promo__button--paypal" href="<?= h(base_url('paypal-create.php?slug=' . urlencode($app_id))) ?>">
                 <?= store_icon('paypal') ?>
                 <span><?= h(ui_label('action.buy_source', 'Mua mã nguồn')) ?> <?= h($source_price_label) ?> <?= h($source_currency) ?></span>
               </a>
