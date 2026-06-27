@@ -182,7 +182,7 @@ include 'includes/header.php';
     <div class="app-detail-info">
       <h2><?= h($app_name) ?></h2>
       <div class="app-meta">
-        <span class="badge"><?= h($app_id) ?></span>
+        <span class="app-id-meta"><?= h($app_id) ?></span>
         <?php if (!empty($app['type'])): ?>
           <span class="badge"><?= h($app['type']) ?></span>
         <?php endif; ?>
