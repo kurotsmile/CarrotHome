@@ -189,9 +189,6 @@ include 'includes/header.php';
         <?php foreach ($app_categories as $category): ?>
           <a class="badge" href="<?= h(category_url($category['category_id'] ?? '')) ?>"><?= h(category_display_title($category)) ?></a>
         <?php endforeach; ?>
-        <?php if (!empty($app['status'])): ?>
-          <span class="badge"><?= h($app['status']) ?></span>
-        <?php endif; ?>
         <?php if (!empty($app['created_at'])): ?>
           <?php $createdDate = date('Y-m-d', strtotime((string)$app['created_at'])); ?>
           <span class="badge"><?= h($createdDate) ?></span>
