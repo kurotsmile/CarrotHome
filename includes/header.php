@@ -87,7 +87,7 @@ $current_key_lang = $current_country['lang_key'] ?? ($current_key_lang ?: 'en');
       </button>
     </form>
     <nav class="site-nav-main" aria-label="<?= h(ui_label('aria.primary_navigation', 'Primary navigation')) ?>">
-      <a href="index.php"><?= h(ui_label('nav.explore', 'Explore')) ?></a>
+      <a href="category.php"><?= h(ui_label('nav.category', 'Category')) ?></a>
       <a href="index.php?type=app"><?= h(ui_label('nav.applications', 'Applications')) ?></a>
       <a href="index.php?type=game"><?= h(ui_label('nav.game', 'Games')) ?></a>
       <?php if (count($header_countries) > 0): ?>

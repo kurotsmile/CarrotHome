@@ -18,6 +18,7 @@ $app = null;
 $images = [];
 $same_type_apps = [];
 $app_content_html = '';
+$app_categories = [];
 $error_message = $db_error ?? '';
 $paypal_config = paypal_config_from_db($pdo ?? null, 'home');
 
@@ -57,6 +58,12 @@ if ($pdo) {
                 unset($query['slug']);
                 header('Location: ' . $canonical_path . (count($query) ? '?' . http_build_query($query) : ''), true, 301);
                 exit;
+            }
+
+            try {
+                $app_categories = fetch_app_category_labels($pdo, $slug, current_lang_key());
+            } catch (Throwable $categoryError) {
+                $app_categories = [];
             }
 
             try {
@@ -160,9 +167,9 @@ include 'includes/header.php';
         <?php if (!empty($app['type'])): ?>
           <span class="badge"><?= h($app['type']) ?></span>
         <?php endif; ?>
-        <?php if (!empty($app['category'])): ?>
-          <span class="badge"><?= h($app['category']) ?></span>
-        <?php endif; ?>
+        <?php foreach ($app_categories as $category): ?>
+          <a class="badge" href="<?= h(category_url($category['category_id'] ?? '')) ?>"><?= h(category_display_title($category)) ?></a>
+        <?php endforeach; ?>
         <?php if (!empty($app['status'])): ?>
           <span class="badge"><?= h($app['status']) ?></span>
         <?php endif; ?>

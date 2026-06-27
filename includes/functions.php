@@ -227,6 +227,14 @@ function page_url($slug, $lang = '') {
     return $url;
 }
 
+function category_url($category_id = '') {
+    $url = base_url('category.php');
+    if (trim((string)$category_id) !== '') {
+        $url .= '?category=' . rawurlencode((string)$category_id);
+    }
+    return $url;
+}
+
 function app_icon($icon) {
     return asset_url(!empty($icon) ? $icon : 'images/logo_carrot.png');
 }
@@ -368,6 +376,40 @@ function app_card_icon($app) {
         return asset_url($candidates[array_rand($candidates)]);
     }
     return app_icon($app['icon'] ?? '');
+}
+
+function category_display_title($category) {
+    $title = trim((string)($category['title'] ?? ''));
+    return $title !== '' ? $title : (string)($category['category_id'] ?? '');
+}
+
+function fetch_app_category_labels($pdo, $app_id, $lang_key = null) {
+    if (!$pdo instanceof PDO || trim((string)$app_id) === '') {
+        return [];
+    }
+
+    $lang_key = trim((string)($lang_key ?? current_lang_key())) ?: 'en';
+
+    try {
+        $stmt = $pdo->prepare('
+            SELECT ca.category_id,
+                   COALESCE(NULLIF(cc_lang.title, ""), NULLIF(cc_en.title, ""), ca.category_id) AS title
+            FROM category_app ca
+            LEFT JOIN app_category_content cc_lang
+              ON cc_lang.category_id = ca.category_id AND cc_lang.key_lang = :lang_key
+            LEFT JOIN app_category_content cc_en
+              ON cc_en.category_id = ca.category_id AND cc_en.key_lang = "en"
+            WHERE ca.app_id = :app_id
+            ORDER BY title ASC, ca.category_id ASC
+        ');
+        $stmt->execute([
+            ':lang_key' => $lang_key,
+            ':app_id' => $app_id,
+        ]);
+        return $stmt->fetchAll();
+    } catch (Throwable $e) {
+        return [];
+    }
 }
 
 function type_icon($type) {
