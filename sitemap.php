@@ -52,10 +52,7 @@ function sitemap_xml_url($loc, $lastmod = '', $changefreq = 'weekly', $priority 
     echo "  <url>\n";
     echo '    <loc>' . h($loc) . "</loc>\n";
     foreach ($languages as $lang) {
-        echo "    <xhtml:link\n";
-        echo "        rel=\"alternate\"\n";
-        echo '        hreflang="' . h($lang) . "\"\n";
-        echo '        href="' . h(sitemap_lang_url($loc, $lang)) . "\"/>\n";
+        echo '    <xhtml:link rel="alternate" hreflang="' . h($lang) . '" href="' . h(sitemap_lang_url($loc, $lang)) . "\"/>\n";
     }
     if (!empty($lastmod)) {
         $lastmod_time = strtotime($lastmod);
@@ -75,13 +72,13 @@ $sitemap_languages = sitemap_languages($pdo ?? null);
 echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
 echo "<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\" xmlns:xhtml=\"http://www.w3.org/1999/xhtml\">\n";
 
-sitemap_xml_url(sitemap_url(''), '', 'daily', '1.0', $sitemap_languages);
+sitemap_xml_url(sitemap_url(''), '', 'daily', '1.0');
 
 if ($pdo) {
     try {
         $stmt = $pdo->query("SELECT id, created_at FROM app WHERE status != 'trash' ORDER BY priority DESC, created_at DESC");
         foreach ($stmt->fetchAll() as $app) {
-            sitemap_xml_url(sitemap_site_url() . app_url($app['id']), $app['created_at'], 'weekly', '0.8', $sitemap_languages);
+            sitemap_xml_url(sitemap_site_url() . app_url($app['id']), $app['created_at'], 'weekly', '0.8');
         }
 
         $page_stmt = $pdo->query("
