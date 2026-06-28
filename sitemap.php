@@ -19,6 +19,10 @@ function sitemap_url($path) {
     return sitemap_site_url() . base_url($path);
 }
 
+function sitemap_xml($value) {
+    return htmlspecialchars((string)$value, ENT_XML1 | ENT_QUOTES, 'UTF-8');
+}
+
 function sitemap_lang_url($loc, $lang) {
     $separator = strpos($loc, '?') === false ? '?' : '&';
     return $loc . $separator . 'lang=' . rawurlencode((string)$lang);
@@ -36,7 +40,7 @@ function sitemap_languages($pdo) {
         $languages = [];
         foreach ($stmt->fetchAll() as $row) {
             $lang = trim((string)($row['lang_key'] ?? ''));
-            if ($lang !== '') {
+            if (preg_match('/^[a-z]{2,3}(?:-[a-z0-9]{2,8})?$/i', $lang)) {
                 $languages[] = $lang;
             }
         }
@@ -48,21 +52,52 @@ function sitemap_languages($pdo) {
     }
 }
 
-function sitemap_xml_url($loc, $lastmod = '', $changefreq = 'weekly', $priority = '0.7', $languages = []) {
+function sitemap_xml_url($loc, $lastmod = '', $changefreq = 'weekly', $priority = '0.7', $alternates = []) {
     echo "  <url>\n";
-    echo '    <loc>' . h($loc) . "</loc>\n";
-    foreach ($languages as $lang) {
-        echo '    <xhtml:link rel="alternate" hreflang="' . h($lang) . '" href="' . h(sitemap_lang_url($loc, $lang)) . "\"/>\n";
+    echo '    <loc>' . sitemap_xml($loc) . "</loc>\n";
+    foreach ($alternates as $lang => $href) {
+        echo "    <xhtml:link\n";
+        echo "        rel=\"alternate\"\n";
+        echo '        hreflang="' . sitemap_xml($lang) . "\"\n";
+        echo '        href="' . sitemap_xml($href) . "\"/>\n";
     }
     if (!empty($lastmod)) {
         $lastmod_time = strtotime($lastmod);
         if ($lastmod_time) {
-            echo '    <lastmod>' . h(date('Y-m-d', $lastmod_time)) . "</lastmod>\n";
+            echo '    <lastmod>' . sitemap_xml(date('Y-m-d', $lastmod_time)) . "</lastmod>\n";
         }
     }
-    echo '    <changefreq>' . h($changefreq) . "</changefreq>\n";
-    echo '    <priority>' . h($priority) . "</priority>\n";
+    echo '    <changefreq>' . sitemap_xml($changefreq) . "</changefreq>\n";
+    echo '    <priority>' . sitemap_xml($priority) . "</priority>\n";
     echo "  </url>\n";
+}
+
+function sitemap_page_alternates($base_loc, $languages) {
+    $alternates = [
+        'x-default' => $base_loc,
+    ];
+
+    foreach ($languages as $lang) {
+        $lang = trim((string)$lang);
+        if (preg_match('/^[a-z]{2,3}(?:-[a-z0-9]{2,8})?$/i', $lang)) {
+            $alternates[$lang] = sitemap_lang_url($base_loc, $lang);
+        }
+    }
+
+    return $alternates;
+}
+
+function sitemap_valid_languages($languages) {
+    $valid = [];
+
+    foreach ($languages as $lang) {
+        $lang = trim((string)$lang);
+        if (preg_match('/^[a-z]{2,3}(?:-[a-z0-9]{2,8})?$/i', $lang)) {
+            $valid[] = $lang;
+        }
+    }
+
+    return array_values(array_unique($valid));
 }
 
 header('Content-Type: application/xml; charset=utf-8');
@@ -82,14 +117,29 @@ if ($pdo) {
         }
 
         $page_stmt = $pdo->query("
-            SELECT slug, MAX(COALESCE(NULLIF(updated_at, ''), created_at)) AS lastmod
+            SELECT
+                slug,
+                GROUP_CONCAT(DISTINCT NULLIF(lang, '') ORDER BY lang ASC) AS languages,
+                MAX(COALESCE(NULLIF(updated_at, ''), created_at)) AS lastmod
             FROM page
             WHERE slug IS NOT NULL AND slug != ''
             GROUP BY slug
             ORDER BY lastmod DESC
         ");
         foreach ($page_stmt->fetchAll() as $page) {
-            sitemap_xml_url(sitemap_site_url() . page_url($page['slug']), $page['lastmod'], 'monthly', '0.6', $sitemap_languages);
+            $base_loc = sitemap_site_url() . page_url($page['slug']);
+            $page_languages = array_filter(array_map('trim', explode(',', (string)($page['languages'] ?? ''))));
+            if (!$page_languages) {
+                $page_languages = $sitemap_languages;
+            }
+            $page_languages = sitemap_valid_languages($page_languages);
+
+            $alternates = sitemap_page_alternates($base_loc, $page_languages);
+            sitemap_xml_url($base_loc, $page['lastmod'], 'monthly', '0.6', $alternates);
+
+            foreach ($page_languages as $lang) {
+                sitemap_xml_url(sitemap_lang_url($base_loc, $lang), $page['lastmod'], 'monthly', '0.6', $alternates);
+            }
         }
     } catch (Throwable $e) {
     }
