@@ -109,6 +109,7 @@ $current_key_lang = $current_country['lang_key'] ?? ($current_key_lang ?: 'en');
           </select>
         </div>
       <?php endif; ?>
+      <a class="login-button" href="login.php"><?= h(ui_label('nav.login', 'Login')) ?></a>
     </nav>
   </div>
 </header>
