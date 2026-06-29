@@ -17,6 +17,7 @@ $slug_candidates = slug_lookup_candidates($slug);
 $app = null;
 $images = [];
 $same_type_apps = [];
+$same_category_apps = [];
 $app_content_html = '';
 $app_content_title = '';
 $app_categories = [];
@@ -65,6 +66,44 @@ if ($pdo) {
                 $app_categories = fetch_app_category_labels($pdo, $slug, current_lang_key());
             } catch (Throwable $categoryError) {
                 $app_categories = [];
+            }
+
+            if (count($app_categories)) {
+                try {
+                    $category_ids = array_values(array_filter(array_unique(array_map(static function ($category) {
+                        return trim((string)($category['category_id'] ?? ''));
+                    }, $app_categories))));
+
+                    if (count($category_ids)) {
+                        $categoryPlaceholders = [];
+                        $categoryParams = [
+                            ':lang_key' => current_lang_key(),
+                            ':slug' => $slug,
+                        ];
+
+                        foreach ($category_ids as $index => $category_id) {
+                            $key = ':category_id' . $index;
+                            $categoryPlaceholders[] = $key;
+                            $categoryParams[$key] = $category_id;
+                        }
+
+                        $sameCategoryStmt = $pdo->prepare("SELECT DISTINCT a.id, a.id AS slug, a.decription, a.github, a.microsoft_store, a.icon, a.itch, a.exe_file, a.ipa_file, a.deb_file,
+                                       a.amazon_app_store, a.huawei_store, a.youtube_link, a.google_play, a.dmg_file, a.uptodown,
+                                       a.simmer, a.type, a.apk_file, a.status, a.priority, a.price, a.category, a.created_at,
+                                       ac.title AS app_content_title
+                                FROM app a
+                                INNER JOIN category_app ca ON ca.app_id = a.id
+                                LEFT JOIN app_content ac
+                                  ON ac.app_id = a.id AND ac.lang_key = :lang_key
+                                WHERE ca.category_id IN (" . implode(',', $categoryPlaceholders) . ") AND a.id != :slug AND a.status != 'trash'
+                                ORDER BY RAND()
+                                LIMIT 8");
+                        $sameCategoryStmt->execute($categoryParams);
+                        $same_category_apps = $sameCategoryStmt->fetchAll();
+                    }
+                } catch (Throwable $sameCategoryError) {
+                    $same_category_apps = [];
+                }
             }
 
             try {
@@ -285,6 +324,48 @@ include 'includes/header.php';
       </div>
       <ol class="same-type-slider">
         <?php foreach ($same_type_apps as $same_app): ?>
+          <?php
+            $same_name = app_display_title($same_app);
+            $same_slug = $same_app['slug'] ?? $same_app['id'];
+            $same_icon = app_card_icon($same_app);
+            $same_downloads = app_download_links($same_app);
+          ?>
+          <li class="same-type-item">
+            <div class="same-type-card">
+              <figure class="same-type-image">
+                <img src="<?= h($same_icon) ?>" alt="<?= h($same_name) ?>" loading="lazy">
+              </figure>
+              <a class="same-type-link" href="<?= h(app_url($same_slug)) ?>" aria-label="<?= h(ui_label('aria.view_app', 'View')) ?> <?= h($same_name) ?>"></a>
+              <div class="same-type-overlay">
+                <?php foreach ($same_downloads as $key => $url): ?>
+                  <a href="<?= h($url) ?>" target="_blank" rel="noopener noreferrer" class="download-chip" aria-label="<?= h(label_name($key)) ?>" title="<?= h(label_name($key)) ?>">
+                    <?= download_icon($key) ?>
+                    <span><?= h(short_label($key)) ?></span>
+                  </a>
+                <?php endforeach; ?>
+              </div>
+            </div>
+            <div class="same-type-meta">
+              <?= type_icon($same_app['type'] ?? 'app') ?>
+              <span><?= h($same_name) ?></span>
+            </div>
+          </li>
+        <?php endforeach; ?>
+      </ol>
+    </section>
+  <?php endif; ?>
+
+  <?php if (count($same_category_apps)): ?>
+    <?php $primary_category = $app_categories[0] ?? null; ?>
+    <section class="same-type-section" aria-labelledby="same-category-heading">
+      <div class="same-type-header">
+        <h3 id="same-category-heading"><?= h(ui_label('section.same_category', 'Cùng chủ đề')) ?></h3>
+        <?php if ($primary_category): ?>
+          <a href="<?= h(category_url($primary_category['category_id'] ?? '')) ?>"><?= h(ui_label('action.view_all', 'View all')) ?></a>
+        <?php endif; ?>
+      </div>
+      <ol class="same-type-slider">
+        <?php foreach ($same_category_apps as $same_app): ?>
           <?php
             $same_name = app_display_title($same_app);
             $same_slug = $same_app['slug'] ?? $same_app['id'];
