@@ -223,7 +223,7 @@ include 'includes/header.php';
       <div class="app-meta">
         <span class="app-id-meta"><?= h($app_id) ?></span>
         <?php if (!empty($app['type'])): ?>
-          <span class="badge"><?= h($app['type']) ?></span>
+          <a class="badge" href="index.php?type=<?= h(urlencode((string) $app['type'])) ?>"><?= h($app['type']) ?></a>
         <?php endif; ?>
         <?php foreach ($app_categories as $category): ?>
           <a class="badge" href="<?= h(category_url($category['category_id'] ?? '')) ?>"><?= h(category_display_title($category)) ?></a>
