@@ -81,22 +81,22 @@ $current_key_lang = $current_country['lang_key'] ?? ($current_key_lang ?: 'en');
 <title><?= h($page_title) ?></title>
 <meta name="description" content="<?= h($page_description) ?>">
 <meta name="theme-color" content="#ff5900">
-<link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
-<link rel="icon" href="favicon/favicon.ico" sizes="any">
-<link rel="manifest" href="favicon/site.webmanifest">
+<link rel="apple-touch-icon" sizes="180x180" href="<?= h(base_url('favicon/apple-touch-icon.png')) ?>">
+<link rel="icon" type="image/png" sizes="32x32" href="<?= h(base_url('favicon/favicon-32x32.png')) ?>">
+<link rel="icon" type="image/png" sizes="16x16" href="<?= h(base_url('favicon/favicon-16x16.png')) ?>">
+<link rel="icon" href="<?= h(base_url('favicon/favicon.ico')) ?>" sizes="any">
+<link rel="manifest" href="<?= h(base_url('favicon/site.webmanifest')) ?>">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
 <?= $extra_head ?? '' ?>
-<link rel="stylesheet" href="styles.css?v=<?= $style_version ?>">
+<link rel="stylesheet" href="<?= h(base_url('styles.css')) ?>?v=<?= $style_version ?>">
 </head>
 <body>
 <header class="site-nav">
   <div class="site-nav__wrapper">
-    <a class="site-nav__logo" href="index.php" aria-label="<?= h(ui_label('aria.back_home', 'Back to home page')) ?>">
-      <img class="brand-logo-img" src="images/carrot_28.png" alt="CarrotHome">
+    <a class="site-nav__logo" href="<?= h(base_url('index.php')) ?>" aria-label="<?= h(ui_label('aria.back_home', 'Back to home page')) ?>">
+      <img class="brand-logo-img" src="<?= h(base_url('images/carrot_28.png')) ?>" alt="CarrotHome">
     </a>
-    <form class="header-search" method="get" action="index.php" aria-label="<?= h(ui_label('aria.search_apps_games', 'Search apps and games')) ?>">
+    <form class="header-search" method="get" action="<?= h(base_url('index.php')) ?>" aria-label="<?= h(ui_label('aria.search_apps_games', 'Search apps and games')) ?>">
       <input name="q" type="search" placeholder="<?= h(ui_label('search.placeholder', 'Search apps and games')) ?>" value="<?= h($header_search) ?>">
       <button class="header-search__button" type="submit" aria-label="<?= h(ui_label('action.search', 'Search')) ?>">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.3-4.3M19 11a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
@@ -104,8 +104,8 @@ $current_key_lang = $current_country['lang_key'] ?? ($current_key_lang ?: 'en');
     </form>
     <nav class="site-nav-main" aria-label="<?= h(ui_label('aria.primary_navigation', 'Primary navigation')) ?>">
       <a href="<?= h(category_url()) ?>"><?= h(ui_label('nav.category', 'Category')) ?></a>
-      <a href="index.php?type=app"><?= h(ui_label('nav.applications', 'Applications')) ?></a>
-      <a href="index.php?type=game"><?= h(ui_label('nav.game', 'Games')) ?></a>
+      <a href="<?= h(base_url('index.php')) ?>?type=app"><?= h(ui_label('nav.applications', 'Applications')) ?></a>
+      <a href="<?= h(base_url('index.php')) ?>?type=game"><?= h(ui_label('nav.game', 'Games')) ?></a>
       <?php if (count($header_countries) > 0): ?>
         <div class="language-menu">
           <select class="language-menu__select" aria-label="<?= h(ui_label('aria.choose_language', 'Choose language')) ?>">

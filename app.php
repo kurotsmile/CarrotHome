@@ -206,7 +206,7 @@ $source_price_label = $source_price !== '' ? number_format((float)$source_price,
 $source_currency = trim((string)($paypal_config['currency'] ?? 'USD'));
 $slider_style_version = file_exists(__DIR__ . '/responsive-lightbox-slider-web/css/style.css') ? filemtime(__DIR__ . '/responsive-lightbox-slider-web/css/style.css') : time();
 $slider_script_version = file_exists(__DIR__ . '/responsive-lightbox-slider-web/js/imagesSlider.js') ? filemtime(__DIR__ . '/responsive-lightbox-slider-web/js/imagesSlider.js') : time();
-$extra_head = '<link rel="stylesheet" href="responsive-lightbox-slider-web/css/style.css?v=' . $slider_style_version . '">' . "\n"
+$extra_head = '<link rel="stylesheet" href="' . h(base_url('responsive-lightbox-slider-web/css/style.css')) . '?v=' . $slider_style_version . '">' . "\n"
     . '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css">' . "\n";
 
 include 'includes/header.php';
@@ -223,7 +223,7 @@ include 'includes/header.php';
       <div class="app-meta">
         <span class="app-id-meta"><?= h($app_id) ?></span>
         <?php if (!empty($app['type'])): ?>
-          <a class="badge" href="index.php?type=<?= h(urlencode((string) $app['type'])) ?>"><?= h($app['type']) ?></a>
+          <a class="badge" href="<?= h(base_url('index.php')) ?>?type=<?= h(urlencode((string) $app['type'])) ?>"><?= h($app['type']) ?></a>
         <?php endif; ?>
         <?php foreach ($app_categories as $category): ?>
           <a class="badge" href="<?= h(category_url($category['category_id'] ?? '')) ?>"><?= h(category_display_title($category)) ?></a>
@@ -320,7 +320,7 @@ include 'includes/header.php';
     <section class="same-type-section" aria-labelledby="same-type-heading">
       <div class="same-type-header">
         <h3 id="same-type-heading"><?= h(ui_label('section.same_type', 'Same Type')) ?></h3>
-        <a href="index.php?type=<?= urlencode($app['type'] ?? '') ?>"><?= h(ui_label('action.view_all', 'View all')) ?></a>
+        <a href="<?= h(base_url('index.php')) ?>?type=<?= urlencode($app['type'] ?? '') ?>"><?= h(ui_label('action.view_all', 'View all')) ?></a>
       </div>
       <ol class="same-type-slider">
         <?php foreach ($same_type_apps as $same_app): ?>
@@ -398,6 +398,6 @@ include 'includes/header.php';
   <?php endif; ?>
 </section>
 
-<script src="responsive-lightbox-slider-web/js/imagesSlider.js?v=<?= (int) $slider_script_version ?>"></script>
+<script src="<?= h(base_url('responsive-lightbox-slider-web/js/imagesSlider.js')) ?>?v=<?= (int) $slider_script_version ?>"></script>
 
 <?php include 'includes/footer.php'; ?>

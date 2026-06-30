@@ -172,7 +172,7 @@ include __DIR__ . '/includes/header.php';
         <div class="user-information">
           <?= type_icon($app['type'] ?? 'app') ?>
           <span class="display-name"><?= h($name) ?></span>
-          <a class="badge-link" href="index.php?type=<?= urlencode($app['type'] ?? 'app') ?>"><?= h($app['type'] ?? 'app') ?></a>
+          <a class="badge-link" href="<?= h(base_url('index.php')) ?>?type=<?= urlencode($app['type'] ?? 'app') ?>"><?= h($app['type'] ?? 'app') ?></a>
         </div>
         <?php if ($primary_store): ?>
           <a class="store-link" href="<?= h($primary_store) ?>" target="_blank" rel="noopener noreferrer"><?= h(ui_label('action.store', 'Store')) ?></a>

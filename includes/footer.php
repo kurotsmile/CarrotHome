@@ -17,16 +17,16 @@ $footer_page_columns = [
 <footer class="site-footer">
   <div class="container footer-inner">
     <div class="footer-brand">
-      <a class="footer-logo" href="index.php"><img class="brand-logo-img" src="images/carrot_28.png" alt="CarrotHome"></a>
+      <a class="footer-logo" href="<?= h(base_url('index.php')) ?>"><img class="brand-logo-img" src="<?= h(base_url('images/carrot_28.png')) ?>" alt="CarrotHome"></a>
       <p><?= h(ui_label('footer.description', 'Kho app và game được sắp xếp gọn gàng, dễ tìm, dễ tải cho nhiều nền tảng.')) ?></p>
     </div>
 
     <nav class="footer-menu" aria-label="<?= h(ui_label('aria.footer_navigation', 'Footer navigation')) ?>">
       <div class="footer-column">
         <h2><?= h(ui_label('nav.explore', 'Explore')) ?></h2>
-        <a href="index.php"><?= h(ui_label('nav.home', 'Home')) ?></a>
-        <a href="index.php?type=app"><?= h(ui_label('nav.applications', 'Applications')) ?></a>
-        <a href="index.php?type=game"><?= h(ui_label('nav.game', 'Game')) ?></a>
+        <a href="<?= h(base_url('index.php')) ?>"><?= h(ui_label('nav.home', 'Home')) ?></a>
+        <a href="<?= h(base_url('index.php')) ?>?type=app"><?= h(ui_label('nav.applications', 'Applications')) ?></a>
+        <a href="<?= h(base_url('index.php')) ?>?type=game"><?= h(ui_label('nav.game', 'Game')) ?></a>
         <a href="<?= h(stores_url()) ?>"><?= h(ui_label('nav.our_stores', 'Our Stores')) ?></a>
       </div>
 

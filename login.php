@@ -128,18 +128,18 @@ $register_form_open = $mode === 'register' && $_SERVER['REQUEST_METHOD'] === 'PO
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title><?= h(ui_label('login.title', 'Login')) ?> - CarrotHome</title>
 <meta name="theme-color" content="#ff5900">
-<link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
-<link rel="icon" href="favicon/favicon.ico" sizes="any">
-<link rel="manifest" href="favicon/site.webmanifest">
-<link rel="stylesheet" href="styles.css?v=<?= $style_version ?>">
+<link rel="apple-touch-icon" sizes="180x180" href="<?= h(base_url('favicon/apple-touch-icon.png')) ?>">
+<link rel="icon" type="image/png" sizes="32x32" href="<?= h(base_url('favicon/favicon-32x32.png')) ?>">
+<link rel="icon" type="image/png" sizes="16x16" href="<?= h(base_url('favicon/favicon-16x16.png')) ?>">
+<link rel="icon" href="<?= h(base_url('favicon/favicon.ico')) ?>" sizes="any">
+<link rel="manifest" href="<?= h(base_url('favicon/site.webmanifest')) ?>">
+<link rel="stylesheet" href="<?= h(base_url('styles.css')) ?>?v=<?= $style_version ?>">
 </head>
 <body>
 <main class="login-page">
   <section class="login-panel" aria-label="<?= h(ui_label('login.title', 'Login')) ?>">
-    <a class="login-logo" href="index.php" aria-label="<?= h(ui_label('aria.back_home', 'Back to home page')) ?>">
-      <img src="images/carrot_28.png" alt="CarrotHome">
+    <a class="login-logo" href="<?= h(base_url('index.php')) ?>" aria-label="<?= h(ui_label('aria.back_home', 'Back to home page')) ?>">
+      <img src="<?= h(base_url('images/carrot_28.png')) ?>" alt="CarrotHome">
     </a>
 
     <?php if (!empty($_SESSION['home_user_id'])): ?>
@@ -147,7 +147,7 @@ $register_form_open = $mode === 'register' && $_SERVER['REQUEST_METHOD'] === 'PO
         <h1><?= h(ui_label('login.logged_in_title', 'You are logged in')) ?></h1>
         <p><?= h($_SESSION['home_user_name'] ?: $_SESSION['home_user_email']) ?></p>
         <div class="login-actions">
-          <a class="login-submit" href="index.php"><?= h(ui_label('action.back_home', 'Back home')) ?></a>
+          <a class="login-submit" href="<?= h(base_url('index.php')) ?>"><?= h(ui_label('action.back_home', 'Back home')) ?></a>
           <a class="login-secondary" href="login.php?logout=1"><?= h(ui_label('action.logout', 'Logout')) ?></a>
         </div>
       </div>
