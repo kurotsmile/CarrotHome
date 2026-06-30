@@ -11,10 +11,15 @@ if (empty($_SESSION['home_user_id'])) {
 }
 
 $orders = [];
+$user = null;
 $error_message = $db_error ?? '';
 
 if ($pdo instanceof PDO) {
     try {
+        $userStmt = $pdo->prepare('SELECT * FROM users WHERE id = ? LIMIT 1');
+        $userStmt->execute([(int)$_SESSION['home_user_id']]);
+        $user = $userStmt->fetch() ?: null;
+
         $stmt = $pdo->prepare('
             SELECT o.*, a.icon AS app_icon, a.decription AS app_description, ac.title AS app_title
             FROM app_orders o
@@ -36,17 +41,24 @@ include __DIR__ . '/includes/header.php';
 ?>
 
 <section class="profile-page">
+  <div class="profile-header">
+    <div class="profile-avatar-large">
+      <?php if (!empty($user['avatar'])): ?>
+        <img src="<?= h($user['avatar']) ?>" alt="">
+      <?php else: ?>
+        <span><?= h(strtoupper(substr(trim((string)($user['name'] ?? 'U')), 0, 1) ?: 'U')) ?></span>
+      <?php endif; ?>
+    </div>
+    <div>
+      <p class="eyebrow"><?= h(ui_label('profile.eyebrow', 'Account')) ?></p>
+      <h2><?= h($user['name'] ?? ui_label('order.heading', 'Your orders')) ?></h2>
+      <p><?= h($user['email'] ?? ui_label('order.intro', 'Track app source purchases and payment status.')) ?></p>
+    </div>
+  </div>
+
   <div class="profile-tabs">
     <a href="profile.php"><?= h(ui_label('profile.tab_information', 'Information')) ?></a>
     <a class="is-active" href="order.php"><?= h(ui_label('profile.tab_order', 'Order')) ?></a>
-  </div>
-
-  <div class="profile-header">
-    <div>
-      <p class="eyebrow"><?= h(ui_label('profile.tab_order', 'Order')) ?></p>
-      <h2><?= h(ui_label('order.heading', 'Your orders')) ?></h2>
-      <p><?= h(ui_label('order.intro', 'Track app source purchases and payment status.')) ?></p>
-    </div>
   </div>
 
   <?php if ($error_message): ?><div class="login-alert login-alert--error"><?= h($error_message) ?></div><?php endif; ?>

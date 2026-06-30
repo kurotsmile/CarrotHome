@@ -61,11 +61,6 @@ include __DIR__ . '/includes/header.php';
 ?>
 
 <section class="profile-page">
-  <div class="profile-tabs">
-    <a class="is-active" href="profile.php"><?= h(ui_label('profile.tab_information', 'Information')) ?></a>
-    <a href="order.php"><?= h(ui_label('profile.tab_order', 'Order')) ?></a>
-  </div>
-
   <div class="profile-header">
     <div class="profile-avatar-large">
       <?php if (!empty($user['avatar'])): ?>
@@ -79,6 +74,11 @@ include __DIR__ . '/includes/header.php';
       <h2><?= h($user['name'] ?? '') ?></h2>
       <p><?= h($user['email'] ?? '') ?></p>
     </div>
+  </div>
+
+  <div class="profile-tabs">
+    <a class="is-active" href="profile.php"><?= h(ui_label('profile.tab_information', 'Information')) ?></a>
+    <a href="order.php"><?= h(ui_label('profile.tab_order', 'Order')) ?></a>
   </div>
 
   <?php if ($message): ?><div class="login-alert login-alert--success"><?= h($message) ?></div><?php endif; ?>
@@ -139,7 +139,9 @@ document.addEventListener('DOMContentLoaded', function () {
   if (window.jQuery && jQuery.fn.select2) {
     jQuery('.profile-sex-select').select2({
       width: '100%',
-      minimumResultsForSearch: Infinity
+      minimumResultsForSearch: Infinity,
+      dropdownParent: jQuery('.profile-page'),
+      dropdownCssClass: 'profile-sex-dropdown'
     });
   }
 });
