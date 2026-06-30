@@ -12,6 +12,11 @@ $social_provider = trim((string)($_GET['auth'] ?? ''));
 $email = trim($_POST['email'] ?? '');
 $name = trim($_POST['name'] ?? '');
 
+if (!empty($_GET['oauth_error'])) {
+    $error_message = trim((string)$_GET['oauth_error']);
+    $mode = 'register';
+}
+
 if (isset($_GET['logout'])) {
     unset($_SESSION['home_user_id'], $_SESSION['home_user_name'], $_SESSION['home_user_email'], $_SESSION['home_user_role']);
     header('Location: login.php');
@@ -19,8 +24,8 @@ if (isset($_GET['logout'])) {
 }
 
 if ($social_provider !== '') {
-    $mode = 'register';
-    $error_message = ui_label('login.social_not_ready', 'Tính năng đăng ký bằng mạng xã hội chưa được cấu hình.');
+    header('Location: social-login.php?provider=' . rawurlencode($social_provider));
+    exit;
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -164,9 +169,9 @@ $register_form_open = $mode === 'register' && $_SERVER['REQUEST_METHOD'] === 'PO
 
         <?php if ($mode === 'register'): ?>
           <div class="social-auth-grid">
-            <a class="social-auth-button" href="login.php?mode=register&auth=google">Google</a>
-            <a class="social-auth-button" href="login.php?mode=register&auth=twitter_x">X</a>
-            <a class="social-auth-button" href="login.php?mode=register&auth=github">GitHub</a>
+            <a class="social-auth-button" href="social-login.php?provider=google">Google</a>
+            <a class="social-auth-button" href="social-login.php?provider=twitter_x">X</a>
+            <a class="social-auth-button" href="social-login.php?provider=github">GitHub</a>
           </div>
           <button class="login-secondary js-register-form-toggle" type="button"><?= h(ui_label('register.with_form', 'Đăng ký bằng form')) ?></button>
           <div class="register-form-fields <?= $register_form_open ? 'is-open' : '' ?>">
