@@ -148,6 +148,30 @@ $current_key_lang = $current_country['lang_key'] ?? ($current_key_lang ?: 'en');
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+  var authHash = new URLSearchParams((window.location.hash || '').replace(/^#/, ''));
+  var accessToken = authHash.get('access_token');
+  if (accessToken) {
+    fetch('<?= h(base_url('oauth-callback.php')) ?>', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
+      credentials: 'same-origin',
+      body: 'action=supabase_token&access_token=' + encodeURIComponent(accessToken)
+    })
+      .then(function (response) { return response.json(); })
+      .then(function (data) {
+        if (!data || !data.success) {
+          throw new Error(data && data.message ? data.message : 'OAuth failed');
+        }
+        history.replaceState(null, document.title, window.location.pathname + window.location.search);
+        window.location.reload();
+      })
+      .catch(function (error) {
+        history.replaceState(null, document.title, window.location.pathname + window.location.search);
+        window.location.href = '<?= h(base_url('login.php')) ?>?mode=register&oauth_error=' + encodeURIComponent(error.message || 'OAuth failed');
+      });
+    return;
+  }
+
   var select = document.querySelector('.language-menu__select');
   if (!select) return;
   var languageChanging = false;
