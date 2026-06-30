@@ -111,6 +111,7 @@ function oauth_callback_login_user(PDO $pdo, string $email, string $name, string
     $_SESSION['home_user_name'] = (string)($user['name'] ?? $name);
     $_SESSION['home_user_email'] = (string)($user['email'] ?? $email);
     $_SESSION['home_user_role'] = (string)($user['role'] ?? 'user');
+    $_SESSION['home_user_avatar'] = (string)($user['avatar'] ?? $avatar);
 }
 
 if (!$pdo instanceof PDO) {

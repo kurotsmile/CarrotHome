@@ -71,11 +71,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]);
 
             session_regenerate_id(true);
-            $_SESSION['home_user_id'] = (int)$pdo->lastInsertId();
-            $_SESSION['home_user_name'] = $name;
-            $_SESSION['home_user_email'] = $email;
-            $_SESSION['home_user_role'] = 'user';
-            $success_message = ui_label('register.success', 'Đăng ký thành công.');
+                $_SESSION['home_user_id'] = (int)$pdo->lastInsertId();
+                $_SESSION['home_user_name'] = $name;
+                $_SESSION['home_user_email'] = $email;
+                $_SESSION['home_user_role'] = 'user';
+                $_SESSION['home_user_avatar'] = '';
+                $success_message = ui_label('register.success', 'Đăng ký thành công.');
         } catch (Throwable $e) {
             $error_message = $e->getMessage();
         }
@@ -108,6 +109,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['home_user_name'] = (string)($user['name'] ?? '');
             $_SESSION['home_user_email'] = (string)($user['email'] ?? '');
             $_SESSION['home_user_role'] = (string)($user['role'] ?? 'user');
+            $_SESSION['home_user_avatar'] = (string)($user['avatar'] ?? '');
             $success_message = ui_label('login.success', 'Đăng nhập thành công.');
         } catch (Throwable $e) {
             $error_message = $e->getMessage();
@@ -168,9 +170,18 @@ $register_form_open = $mode === 'register' && $_SERVER['REQUEST_METHOD'] === 'PO
         <?php endif; ?>
 
         <div class="social-auth-grid">
-          <a class="social-auth-button" href="social-login.php?provider=google">Google</a>
-          <a class="social-auth-button" href="social-login.php?provider=twitter_x">X</a>
-          <a class="social-auth-button" href="social-login.php?provider=github">GitHub</a>
+          <a class="social-auth-button" href="social-login.php?provider=google" aria-label="Google">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285f4" d="M21.6 12.2c0-.7-.1-1.3-.2-1.8H12v3.5h5.4c-.2 1.1-.9 2.1-1.9 2.7v2.2h3c1.8-1.6 3.1-3.9 3.1-6.6Z"/><path fill="#34a853" d="M12 22c2.7 0 5-0.9 6.6-2.5l-3-2.2c-.8.5-1.9.9-3.6.9-2.6 0-4.8-1.7-5.6-4.1H3.3v2.3C4.9 19.7 8.2 22 12 22Z"/><path fill="#fbbc05" d="M6.4 14.1c-.2-.6-.3-1.3-.3-2.1s.1-1.4.3-2.1V7.6H3.3C2.5 8.9 2.1 10.4 2.1 12s.4 3.1 1.2 4.4l3.1-2.3Z"/><path fill="#ea4335" d="M12 5.8c1.5 0 2.8.5 3.8 1.5l2.8-2.8C17 2.9 14.7 2 12 2 8.2 2 4.9 4.3 3.3 7.6l3.1 2.3c.8-2.4 3-4.1 5.6-4.1Z"/></svg>
+            <span>Google</span>
+          </a>
+          <a class="social-auth-button" href="social-login.php?provider=twitter_x" aria-label="X">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M18.3 2.8h3.3l-7.2 8.2 8.5 10.2h-6.6l-5.2-6.2-6 6.2H1.8l7.7-8.7L1.4 2.8h6.8l4.7 5.7 5.4-5.7Zm-1.2 16.6h1.8L7.2 4.5H5.3l11.8 14.9Z"/></svg>
+            <span>X</span>
+          </a>
+          <a class="social-auth-button" href="social-login.php?provider=github" aria-label="GitHub">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-3.2 19.5c.5.1.7-.2.7-.5v-1.8c-2.9.6-3.5-1.2-3.5-1.2-.5-1.1-1.1-1.4-1.1-1.4-.9-.6.1-.6.1-.6 1 0 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8.1-.6.3-1.1.6-1.3-2.3-.3-4.7-1.1-4.7-5A3.9 3.9 0 0 1 6.4 8.7c-.1-.3-.5-1.3.1-2.7 0 0 .8-.3 2.8 1a9.6 9.6 0 0 1 5.2 0c2-1.3 2.8-1 2.8-1 .6 1.4.2 2.4.1 2.7a3.9 3.9 0 0 1 1.1 2.8c0 3.9-2.4 4.7-4.7 5 .4.3.7.9.7 1.8V21c0 .3.2.6.7.5A10 10 0 0 0 12 2Z"/></svg>
+            <span>GitHub</span>
+          </a>
         </div>
 
         <?php if ($mode === 'register'): ?>

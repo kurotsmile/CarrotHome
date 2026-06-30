@@ -11,6 +11,7 @@ $header_countries = [];
 $current_key_lang = trim((string)($_SESSION['key_lang'] ?? ''));
 $current_country_id = (int)($_SESSION['country_id'] ?? 0);
 $current_country = null;
+$header_user = null;
 
 initialize_language_from_ip($pdo ?? null);
 
@@ -23,6 +24,21 @@ if (isset($pdo) && $pdo instanceof PDO) {
         $header_countries = $country_stmt->fetchAll();
     } catch (Throwable $e) {
         $header_countries = [];
+    }
+
+    if (!empty($_SESSION['home_user_id'])) {
+        try {
+            $user_stmt = $pdo->prepare('SELECT id, name, email, avatar FROM users WHERE id = ? LIMIT 1');
+            $user_stmt->execute([(int)$_SESSION['home_user_id']]);
+            $header_user = $user_stmt->fetch() ?: null;
+            if ($header_user) {
+                $_SESSION['home_user_name'] = (string)($header_user['name'] ?? '');
+                $_SESSION['home_user_email'] = (string)($header_user['email'] ?? '');
+                $_SESSION['home_user_avatar'] = (string)($header_user['avatar'] ?? '');
+            }
+        } catch (Throwable $e) {
+            $header_user = null;
+        }
     }
 }
 
@@ -109,7 +125,22 @@ $current_key_lang = $current_country['lang_key'] ?? ($current_key_lang ?: 'en');
           </select>
         </div>
       <?php endif; ?>
-      <a class="login-button" href="login.php"><?= h(ui_label('nav.login', 'Login')) ?></a>
+      <?php if ($header_user): ?>
+        <?php
+          $header_user_name = trim((string)($header_user['name'] ?? '')) ?: (string)($header_user['email'] ?? '');
+          $header_user_avatar = trim((string)($header_user['avatar'] ?? ''));
+          $header_user_initial = strtoupper(substr($header_user_name, 0, 1) ?: 'U');
+        ?>
+        <a class="profile-button" href="profile.php" title="<?= h($header_user_name) ?>" aria-label="<?= h(ui_label('nav.profile', 'Profile')) ?>">
+          <?php if ($header_user_avatar !== ''): ?>
+            <img src="<?= h($header_user_avatar) ?>" alt="">
+          <?php else: ?>
+            <span><?= h($header_user_initial) ?></span>
+          <?php endif; ?>
+        </a>
+      <?php else: ?>
+        <a class="login-button" href="login.php"><?= h(ui_label('nav.login', 'Login')) ?></a>
+      <?php endif; ?>
     </nav>
   </div>
 </header>
