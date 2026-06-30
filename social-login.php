@@ -43,7 +43,7 @@ $projectUrl = rtrim(trim((string)($config['project_url'] ?? '')), '/');
 $apiKey = trim((string)($config['api_key'] ?? ''));
 
 if ($projectUrl !== '' && $apiKey !== '') {
-    $supabaseProvider = $provider === 'twitter_x' ? 'twitter' : $provider;
+    $supabaseProvider = $provider === 'twitter_x' ? 'x' : $provider;
     $_SESSION['oauth_mode'] = 'supabase';
     $_SESSION['oauth_supabase_project_url'] = $projectUrl;
     $_SESSION['oauth_supabase_api_key'] = $apiKey;
