@@ -235,6 +235,10 @@ function category_url($category_id = '') {
     return $url;
 }
 
+function stores_url() {
+    return base_url('stores.php');
+}
+
 function app_icon($icon) {
     return asset_url(!empty($icon) ? $icon : 'images/logo_carrot.png');
 }

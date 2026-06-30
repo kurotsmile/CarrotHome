@@ -25,6 +25,7 @@ $footer_page_columns = [
       <div class="footer-column">
         <h2><?= h(ui_label('nav.explore', 'Explore')) ?></h2>
         <a href="index.php"><?= h(ui_label('nav.home', 'Home')) ?></a>
+        <a href="<?= h(stores_url()) ?>"><?= h(ui_label('nav.our_stores', 'Our Stores')) ?></a>
         <a href="index.php?type=app"><?= h(ui_label('nav.applications', 'Applications')) ?></a>
         <a href="index.php?type=game"><?= h(ui_label('nav.game', 'Game')) ?></a>
       </div>
