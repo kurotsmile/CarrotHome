@@ -167,12 +167,13 @@ $register_form_open = $mode === 'register' && $_SERVER['REQUEST_METHOD'] === 'PO
           <div class="login-alert login-alert--success"><?= h($success_message) ?></div>
         <?php endif; ?>
 
+        <div class="social-auth-grid">
+          <a class="social-auth-button" href="social-login.php?provider=google">Google</a>
+          <a class="social-auth-button" href="social-login.php?provider=twitter_x">X</a>
+          <a class="social-auth-button" href="social-login.php?provider=github">GitHub</a>
+        </div>
+
         <?php if ($mode === 'register'): ?>
-          <div class="social-auth-grid">
-            <a class="social-auth-button" href="social-login.php?provider=google">Google</a>
-            <a class="social-auth-button" href="social-login.php?provider=twitter_x">X</a>
-            <a class="social-auth-button" href="social-login.php?provider=github">GitHub</a>
-          </div>
           <button class="login-secondary js-register-form-toggle" type="button"><?= h(ui_label('register.with_form', 'Đăng ký bằng form')) ?></button>
           <div class="register-form-fields <?= $register_form_open ? 'is-open' : '' ?>">
             <label for="register_name"><?= h(ui_label('label.name', 'Name')) ?></label>
