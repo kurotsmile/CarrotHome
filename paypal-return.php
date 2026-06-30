@@ -164,7 +164,7 @@ $extra_head = '<style>
 .paypal-result h1{margin:0;color:var(--text);font-size:34px;line-height:1.1}
 .paypal-result p{margin:0;color:var(--muted);line-height:1.7}
 .paypal-result-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:6px}
-.paypal-result-button{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:46px;padding:0 18px;border-radius:8px;background:var(--accent);color:#fff;font-weight:900}
+.paypal-result-button{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:46px;padding:0 18px;border-radius:8px;background:var(--accent);color:#fff;font-weight:900;white-space:nowrap}
 .paypal-result-button:hover{background:var(--accent-dark);color:#fff}
 .paypal-result-button.is-secondary{border:1px solid var(--line);background:#fff;color:var(--text)}
 .paypal-result-button.is-secondary:hover{border-color:var(--accent);color:var(--accent)}
@@ -176,7 +176,7 @@ $extra_head = '<style>
 .paypal-result-meta{display:grid;gap:10px;padding-top:8px;border-top:1px solid var(--line)}
 .paypal-result-meta div{display:flex;justify-content:space-between;gap:16px;color:var(--muted);font-size:13px}
 .paypal-result-meta strong{color:var(--text);text-align:right;word-break:break-word}
-@media (max-width:820px){.paypal-result{margin-top:28px}.paypal-result-card{grid-template-columns:1fr;padding:20px}.paypal-result h1{font-size:27px}.paypal-result-actions{display:grid}.paypal-result-button{width:100%}}
+@media (max-width:820px){.paypal-result{margin-top:28px}.paypal-result-card{grid-template-columns:1fr;padding:20px}.paypal-result h1{font-size:27px}.paypal-result-actions{display:grid}.paypal-result-button{width:100%;padding-inline:14px;font-size:14px}}
 </style>';
 
 include __DIR__ . '/includes/header.php';
