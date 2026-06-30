@@ -12,6 +12,7 @@ visit_track_daily_ip($pdo ?? null);
 
 $lang_key = current_lang_key();
 $selected_category_id = trim(rawurldecode((string)($_GET['category'] ?? '')));
+$selected_category_candidates = slug_lookup_candidates($selected_category_id);
 $categories = [];
 $apps = [];
 $category_detail = null;
@@ -37,6 +38,20 @@ if ($pdo) {
             $stmt->execute([':lang_key' => $lang_key]);
             $categories = $stmt->fetchAll();
         } else {
+            $categoryPlaceholders = [];
+            $categoryOrderCases = [];
+            $categoryParams = [
+                ':lang_key' => $lang_key,
+            ];
+            foreach ($selected_category_candidates as $index => $candidate) {
+                $key = ':category_id' . $index;
+                $orderKey = ':category_order_id' . $index;
+                $categoryPlaceholders[] = $key;
+                $categoryOrderCases[] = 'WHEN ' . $orderKey . ' THEN ' . $index;
+                $categoryParams[$key] = $candidate;
+                $categoryParams[$orderKey] = $candidate;
+            }
+
             $categoryStmt = $pdo->prepare('
                 SELECT c.category_id, c.icon,
                        COALESCE(NULLIF(cc_lang.title, ""), NULLIF(cc_en.title, ""), c.category_id) AS title,
@@ -46,19 +61,18 @@ if ($pdo) {
                   ON cc_lang.category_id = c.category_id AND cc_lang.key_lang = :lang_key
                 LEFT JOIN app_category_content cc_en
                   ON cc_en.category_id = c.category_id AND cc_en.key_lang = "en"
-                WHERE c.category_id = :category_id
+                WHERE c.category_id IN (' . implode(',', $categoryPlaceholders) . ')
+                ORDER BY CASE c.category_id ' . implode(' ', $categoryOrderCases) . ' ELSE 999 END
                 LIMIT 1
             ');
-            $categoryStmt->execute([
-                ':lang_key' => $lang_key,
-                ':category_id' => $selected_category_id,
-            ]);
+            $categoryStmt->execute($categoryParams);
             $category_detail = $categoryStmt->fetch() ?: [
                 'category_id' => $selected_category_id,
                 'icon' => '',
                 'title' => $selected_category_id,
                 'description' => '',
             ];
+            $resolved_category_id = (string)($category_detail['category_id'] ?? $selected_category_id);
 
             $appStmt = $pdo->prepare("
                 SELECT a.id, a.id AS slug, a.decription, a.github, a.microsoft_store, a.icon, a.itch, a.exe_file, a.ipa_file, a.deb_file,
@@ -75,7 +89,7 @@ if ($pdo) {
             ");
             $appStmt->execute([
                 ':lang_key' => $lang_key,
-                ':category_id' => $selected_category_id,
+                ':category_id' => $resolved_category_id,
             ]);
             $apps = $appStmt->fetchAll();
         }
