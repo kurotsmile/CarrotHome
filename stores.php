@@ -52,13 +52,13 @@ include __DIR__ . '/includes/header.php';
   <?php endif; ?>
 
   <?php if (!$error_message && count($stores)): ?>
-    <ol class="category-grid">
+    <ol class="store-grid">
       <?php foreach ($stores as $store): ?>
         <?php
           $title = trim((string)($store['title'] ?? '')) ?: (string)($store['slug'] ?? '');
           $link = trim((string)($store['link'] ?? ''));
         ?>
-        <li class="category-card">
+        <li class="store-card">
           <a href="<?= h($link !== '' ? $link : '#') ?>" <?= $link !== '' ? 'target="_blank" rel="noopener noreferrer"' : '' ?>>
             <figure>
               <img src="<?= h(app_icon($store['icon'] ?? '')) ?>" alt="<?= h($title) ?>" loading="lazy">
