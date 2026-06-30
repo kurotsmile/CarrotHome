@@ -1,8 +1,11 @@
 RewriteEngine On
 
 RewriteRule ^sitemap\.xml$ sitemap.php [L]
+RewriteRule ^stores/?$ stores.php [QSA,L]
+RewriteRule ^category/?$ category.php [QSA,L]
+RewriteRule ^category/(.+)$ category.php?category=$1 [QSA,L,B]
 
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{REQUEST_URI} !^/(index|app|page|sitemap|adminer)\.php
+RewriteCond %{REQUEST_URI} !^/(index|app|page|category|stores|sitemap|adminer)\.php
 RewriteRule ^(.+)$ index.php?slug=$1 [QSA,L]

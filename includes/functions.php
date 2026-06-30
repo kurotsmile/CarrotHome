@@ -228,15 +228,15 @@ function page_url($slug, $lang = '') {
 }
 
 function category_url($category_id = '') {
-    $url = base_url('category.php');
+    $url = base_url('category');
     if (trim((string)$category_id) !== '') {
-        $url .= '?category=' . rawurlencode((string)$category_id);
+        $url .= '/' . seo_slug_encode((string)$category_id);
     }
     return $url;
 }
 
 function stores_url() {
-    return base_url('stores.php');
+    return base_url('stores');
 }
 
 function app_icon($icon) {

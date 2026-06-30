@@ -11,7 +11,7 @@ initialize_language_from_ip($pdo ?? null);
 visit_track_daily_ip($pdo ?? null);
 
 $lang_key = current_lang_key();
-$selected_category_id = trim((string)($_GET['category'] ?? ''));
+$selected_category_id = trim(rawurldecode((string)($_GET['category'] ?? '')));
 $categories = [];
 $apps = [];
 $category_detail = null;
