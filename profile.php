@@ -61,6 +61,11 @@ include __DIR__ . '/includes/header.php';
 ?>
 
 <section class="profile-page">
+  <div class="profile-tabs">
+    <a class="is-active" href="profile.php"><?= h(ui_label('profile.tab_information', 'Information')) ?></a>
+    <a href="order.php"><?= h(ui_label('profile.tab_order', 'Order')) ?></a>
+  </div>
+
   <div class="profile-header">
     <div class="profile-avatar-large">
       <?php if (!empty($user['avatar'])): ?>
@@ -103,7 +108,12 @@ include __DIR__ . '/includes/header.php';
       </label>
       <label>
         <span><?= h(ui_label('label.sex', 'Sex')) ?></span>
-        <input name="sex" value="<?= h($user['sex'] ?? '') ?>">
+        <?php $profileSex = trim((string)($user['sex'] ?? '')); ?>
+        <select class="profile-sex-select" name="sex">
+          <option value=""></option>
+          <option value="male" <?= $profileSex === 'male' ? 'selected' : '' ?>>Male</option>
+          <option value="female" <?= $profileSex === 'female' ? 'selected' : '' ?>>Female</option>
+        </select>
       </label>
     </div>
 
@@ -123,5 +133,16 @@ include __DIR__ . '/includes/header.php';
     </div>
   </form>
 </section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  if (window.jQuery && jQuery.fn.select2) {
+    jQuery('.profile-sex-select').select2({
+      width: '100%',
+      minimumResultsForSearch: Infinity
+    });
+  }
+});
+</script>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>

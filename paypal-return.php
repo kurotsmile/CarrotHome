@@ -63,8 +63,31 @@ curl_close($ch);
 
 $capture_data = json_decode((string)$capture_response, true);
 if ($capture_status >= 300 || ($capture_data['status'] ?? '') !== 'COMPLETED') {
+    if ($pdo instanceof PDO) {
+        $stmt = $pdo->prepare('UPDATE app_orders SET status = ?, paypal_payload = ? WHERE paypal_order_id = ?');
+        $stmt->execute([
+            (string)($capture_data['status'] ?? 'FAILED'),
+            json_encode($capture_data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+            $order_id,
+        ]);
+    }
     http_response_code(402);
     exit('PayPal payment was not completed.');
+}
+
+if ($pdo instanceof PDO) {
+    $payerEmail = (string)($capture_data['payer']['email_address'] ?? '');
+    $stmt = $pdo->prepare('
+        UPDATE app_orders
+        SET status = ?, payer_email = ?, paypal_payload = ?, paid_at = NOW()
+        WHERE paypal_order_id = ?
+    ');
+    $stmt->execute([
+        (string)($capture_data['status'] ?? 'COMPLETED'),
+        $payerEmail,
+        json_encode($capture_data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+        $order_id,
+    ]);
 }
 
 unset($_SESSION['paypal_app_orders'][$order_id]);

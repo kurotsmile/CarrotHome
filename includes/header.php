@@ -131,13 +131,20 @@ $current_key_lang = $current_country['lang_key'] ?? ($current_key_lang ?: 'en');
           $header_user_avatar = trim((string)($header_user['avatar'] ?? ''));
           $header_user_initial = strtoupper(substr($header_user_name, 0, 1) ?: 'U');
         ?>
-        <a class="profile-button" href="profile.php" title="<?= h($header_user_name) ?>" aria-label="<?= h(ui_label('nav.profile', 'Profile')) ?>">
-          <?php if ($header_user_avatar !== ''): ?>
-            <img src="<?= h($header_user_avatar) ?>" alt="">
-          <?php else: ?>
-            <span><?= h($header_user_initial) ?></span>
-          <?php endif; ?>
-        </a>
+        <div class="profile-menu">
+          <a class="profile-button" href="profile.php" title="<?= h($header_user_name) ?>" aria-label="<?= h(ui_label('nav.profile', 'Profile')) ?>">
+            <?php if ($header_user_avatar !== ''): ?>
+              <img src="<?= h($header_user_avatar) ?>" alt="">
+            <?php else: ?>
+              <span><?= h($header_user_initial) ?></span>
+            <?php endif; ?>
+          </a>
+          <div class="profile-menu__dropdown">
+            <a href="profile.php"><?= h(ui_label('nav.edit_profile', 'Edit Profile')) ?></a>
+            <a href="order.php"><?= h(ui_label('nav.order', 'Order')) ?></a>
+            <a href="login.php?logout=1"><?= h(ui_label('action.logout', 'Logout')) ?></a>
+          </div>
+        </div>
       <?php else: ?>
         <a class="login-button" href="login.php"><?= h(ui_label('nav.login', 'Login')) ?></a>
       <?php endif; ?>

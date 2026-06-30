@@ -13,6 +13,11 @@ if ($slug === '' || empty($paypal_config['enabled'])) {
     exit('Invalid payment request.');
 }
 
+if (empty($_SESSION['home_user_id'])) {
+    header('Location: login.php?mode=login&oauth_error=' . rawurlencode('Vui lòng đăng nhập trước khi mua app.'));
+    exit;
+}
+
 if (empty($paypal_config['client_id']) || empty($paypal_config['client_secret'])) {
     http_response_code(500);
     exit('PayPal config is missing.');
@@ -111,6 +116,28 @@ if ($order_status >= 300 || empty($order_data['id']) || empty($order_data['links
 }
 
 $_SESSION['paypal_app_orders'][$order_data['id']] = $slug;
+
+if ($pdo instanceof PDO) {
+    $stmt = $pdo->prepare('
+        INSERT INTO app_orders (app_id, user_id, paypal_order_id, status, amount, currency, paypal_payload)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE
+          user_id = VALUES(user_id),
+          status = VALUES(status),
+          amount = VALUES(amount),
+          currency = VALUES(currency),
+          paypal_payload = VALUES(paypal_payload)
+    ');
+    $stmt->execute([
+        $slug,
+        (int)$_SESSION['home_user_id'],
+        $order_data['id'],
+        (string)($order_data['status'] ?? 'CREATED'),
+        $source_price,
+        $paypal_config['currency'],
+        json_encode($order_data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+    ]);
+}
 
 foreach ($order_data['links'] as $link) {
     if (($link['rel'] ?? '') === 'approve' && !empty($link['href'])) {

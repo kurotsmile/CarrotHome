@@ -18,7 +18,7 @@ if (!empty($_GET['oauth_error'])) {
 }
 
 if (isset($_GET['logout'])) {
-    unset($_SESSION['home_user_id'], $_SESSION['home_user_name'], $_SESSION['home_user_email'], $_SESSION['home_user_role']);
+    unset($_SESSION['home_user_id'], $_SESSION['home_user_name'], $_SESSION['home_user_email'], $_SESSION['home_user_role'], $_SESSION['home_user_avatar']);
     header('Location: login.php');
     exit;
 }
