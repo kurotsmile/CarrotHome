@@ -153,13 +153,13 @@ $register_form_open = $mode === 'register' && $_SERVER['REQUEST_METHOD'] === 'PO
       </div>
     <?php else: ?>
       <div class="login-tabs" role="tablist" aria-label="<?= h(ui_label('login.tabs', 'Account access')) ?>">
-        <a class="<?= $mode === 'login' ? 'is-active' : '' ?>" href="login.php"><?= h(ui_label('action.login', 'Login')) ?></a>
-        <a class="<?= $mode === 'register' ? 'is-active' : '' ?>" href="login.php?mode=register"><?= h(ui_label('action.register', 'Register')) ?></a>
+        <a class="<?= $mode === 'login' ? 'is-active' : '' ?>" href="login.php"><?= h(ui_label('nav.login', 'Login')) ?></a>
+        <a class="<?= $mode === 'register' ? 'is-active' : '' ?>" href="login.php?mode=register"><?= h(ui_label('nav.register', 'Register')) ?></a>
       </div>
 
       <form class="login-form <?= $mode === 'register' ? 'is-register-mode' : '' ?>" method="post">
         <input type="hidden" name="mode" value="<?= h($mode) ?>">
-        <h1><?= h($mode === 'register' ? ui_label('register.heading', 'Register') : ui_label('login.heading', 'Login')) ?></h1>
+        <h1><?= h($mode === 'register' ? ui_label('nav.register', 'Register') : ui_label('nav.login', 'Login')) ?></h1>
         <p><?= h($mode === 'register' ? ui_label('register.intro', 'Create your CarrotHome account.') : ui_label('login.intro', 'Sign in to your CarrotHome account.')) ?></p>
 
         <?php if ($error_message): ?>
