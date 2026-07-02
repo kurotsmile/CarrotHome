@@ -110,8 +110,8 @@ include __DIR__ . '/includes/header.php';
 
 <section class="category-page">
   <div class="category-page__header">
-    <p class="eyebrow"><?= h(ui_label('nav.category', 'Category')) ?></p>
-    <h2><?= h($selected_category_id === '' ? ui_label('category.heading', 'Category') : category_display_title($category_detail)) ?></h2>
+    <p class="eyebrow">Category</p>
+    <h2><?= h(ui_label('nav.category', 'Category')) ?></h2>
     <?php if ($selected_category_id !== '' && trim((string)($category_detail['description'] ?? '')) !== ''): ?>
       <p><?= h($category_detail['description']) ?></p>
     <?php endif; ?>

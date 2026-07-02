@@ -35,8 +35,8 @@ include __DIR__ . '/includes/header.php';
 
 <section class="category-page">
   <div class="category-page__header">
-    <p class="eyebrow"><?= h(ui_label('nav.our_stores', 'Our Stores')) ?></p>
-    <h2><?= h(ui_label('stores.heading', 'Our Stores')) ?></h2>
+    <p class="eyebrow">Our Stores</p>
+    <h2><?= h(ui_label('nav.our_stores', 'Our Stores')) ?></h2>
     <p><?= h(ui_label('stores.intro', 'Find Carrot apps and games across our official stores and distribution channels.')) ?></p>
   </div>
 
