@@ -203,7 +203,7 @@ $register_form_open = $mode === 'register' && $_SERVER['REQUEST_METHOD'] === 'PO
           </div>
         <?php endif; ?>
 
-        <button class="login-submit" type="submit"><?= h($mode === 'register' ? ui_label('action.register', 'Register') : ui_label('action.login', 'Login')) ?></button>
+        <button class="login-submit" type="submit"><?= h($mode === 'register' ? ui_label('nav.register', 'Register') : ui_label('nav.login', 'Login')) ?></button>
       </form>
     <?php endif; ?>
   </section>
