@@ -56,6 +56,36 @@ $error_message = $db_error ?? '';
 $search = trim($_GET['q'] ?? '');
 $type = trim($_GET['type'] ?? 'all');
 $status = trim($_GET['status'] ?? '');
+$sort = trim((string) ($_GET['sort'] ?? 'new'));
+$dir = strtolower(trim((string) ($_GET['dir'] ?? 'desc')));
+$sort_options = [
+    'new' => ['label' => ui_label('sort.new', 'new'), 'default_dir' => 'desc'],
+    'trending' => ['label' => ui_label('sort.trending', 'thịnh hành'), 'default_dir' => 'desc'],
+    'views' => ['label' => ui_label('sort.views', 'xem nhiều nhất'), 'default_dir' => 'desc'],
+];
+if (!isset($sort_options[$sort])) {
+    $sort = 'new';
+}
+if (!in_array($dir, ['asc', 'desc'], true)) {
+    $dir = $sort_options[$sort]['default_dir'];
+}
+
+function home_sort_url(string $sort_key, string $current_sort, string $current_dir, array $sort_options): string
+{
+    $query = $_GET;
+    $query['sort'] = $sort_key;
+    $query['dir'] = ($sort_key === $current_sort && $current_dir === 'desc') ? 'asc' : 'desc';
+    if ($sort_key !== $current_sort) {
+        $query['dir'] = $sort_options[$sort_key]['default_dir'] ?? 'desc';
+    }
+    foreach ($query as $key => $value) {
+        if ($value === '' || $value === null || ($key === 'type' && $value === 'all') || ($key === 'status' && $value === '')) {
+            unset($query[$key]);
+        }
+    }
+
+    return base_url('index.php') . (count($query) ? '?' . http_build_query($query) : '');
+}
 
 if ($pdo) {
     try {
@@ -63,6 +93,12 @@ if ($pdo) {
         $params = [];
         $lang_key = current_lang_key();
         $params[':lang_key'] = $lang_key;
+        $has_app_view_table = true;
+        try {
+            $pdo->query('SELECT 1 FROM app_view LIMIT 1');
+        } catch (Throwable $viewTableError) {
+            $has_app_view_table = false;
+        }
 
         if ($status === '') {
             $status = 'public';
@@ -87,6 +123,13 @@ if ($pdo) {
         }
 
         $where_sql = count($where) ? 'WHERE ' . implode(' AND ', $where) : '';
+        $order_dir = $dir === 'asc' ? 'ASC' : 'DESC';
+        $order_by = 'a.created_at ' . $order_dir . ', a.priority DESC, a.id ASC';
+        if ($sort === 'trending') {
+            $order_by = 'a.priority ' . $order_dir . ', a.created_at DESC, a.id ASC';
+        } elseif ($sort === 'views') {
+            $order_by = 'view_count ' . $order_dir . ', a.priority DESC, a.created_at DESC, a.id ASC';
+        }
 
         $count_stmt = $pdo->prepare("
             SELECT COUNT(DISTINCT a.id)
@@ -98,15 +141,23 @@ if ($pdo) {
         $count_stmt->execute($params);
         $total_apps = (int)$count_stmt->fetchColumn();
 
+        $view_join_sql = $has_app_view_table
+            ? "SELECT app_id, COUNT(*) AS view_count FROM app_view GROUP BY app_id"
+            : "SELECT '' AS app_id, 0 AS view_count WHERE 1 = 0";
+
         $sql = "SELECT a.id, a.id AS slug, a.decription, a.github, a.microsoft_store, a.icon, a.itch, a.exe_file, a.ipa_file, a.deb_file,
                        a.amazon_app_store, a.huawei_store, a.youtube_link, a.google_play, a.dmg_file, a.uptodown,
                        a.simmer, a.type, a.apk_file, a.status, a.priority, a.price, a.category, a.created_at,
-                       ac.title AS app_content_title
+                       ac.title AS app_content_title,
+                       COALESCE(av.view_count, 0) AS view_count
                 FROM app a
                 LEFT JOIN app_content ac
                   ON ac.app_id = a.id AND ac.lang_key = :lang_key
+                LEFT JOIN (
+                  {$view_join_sql}
+                ) av ON av.app_id = a.id
                 {$where_sql}
-                ORDER BY a.priority DESC, a.created_at DESC, a.id ASC
+                ORDER BY {$order_by}
                 LIMIT 120";
 
         $stmt = $pdo->prepare($sql);
@@ -135,7 +186,22 @@ include __DIR__ . '/includes/header.php';
   </div>
 <?php endif; ?>
 
-<div class="result-line"><?= h($total_apps) ?> <?= h(ui_label('label.apps', 'apps')) ?></div>
+<div class="result-bar">
+  <div class="result-line"><?= h($total_apps) ?> <?= h(ui_label('label.apps', 'apps')) ?></div>
+  <nav class="sort-filter" aria-label="<?= h(ui_label('aria.sort_apps', 'Sort apps')) ?>">
+    <?php foreach ($sort_options as $sort_key => $sort_option): ?>
+      <?php
+        $is_active_sort = $sort === $sort_key;
+        $next_dir = ($is_active_sort && $dir === 'desc') ? 'asc' : 'desc';
+        $sort_label = (string) ($sort_option['label'] ?? $sort_key);
+      ?>
+      <a class="sort-filter__item<?= $is_active_sort ? ' is-active' : '' ?>" href="<?= h(home_sort_url($sort_key, $sort, $dir, $sort_options)) ?>" aria-label="<?= h($sort_label . ' ' . strtoupper($is_active_sort ? $next_dir : ($sort_option['default_dir'] ?? 'desc'))) ?>">
+        <span><?= h($sort_label) ?></span>
+        <span class="sort-filter__icon<?= $is_active_sort ? ' sort-filter__icon--' . h($dir) : '' ?>" aria-hidden="true"></span>
+      </a>
+    <?php endforeach; ?>
+  </nav>
+</div>
 
 <?php if (!$error_message && count($apps) === 0): ?>
   <p class="empty-state"><?= h(ui_label('empty.no_matching_apps', 'Không tìm thấy app phù hợp.')) ?></p>

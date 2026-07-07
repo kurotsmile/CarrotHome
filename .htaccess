@@ -5,6 +5,9 @@ RewriteRule ^stores/?$ stores.php [QSA,L]
 RewriteRule ^category/?$ category.php [QSA,L]
 RewriteRule ^category/(.+)$ category.php?category=$1 [QSA,L,B]
 
+# App detail
+RewriteRule ^apps/([^/]+)/?$ app.php?slug=$1 [QSA,L,B]
+
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_URI} !^/(index|app|page|category|stores|sitemap|adminer)\.php

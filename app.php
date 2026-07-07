@@ -21,6 +21,7 @@ $same_category_apps = [];
 $app_content_html = '';
 $app_content_title = '';
 $app_categories = [];
+$app_view_count = 0;
 $error_message = $db_error ?? '';
 $paypal_config = paypal_config_from_db($pdo ?? null, 'home');
 
@@ -61,6 +62,9 @@ if ($pdo) {
                 header('Location: ' . $canonical_path . (count($query) ? '?' . http_build_query($query) : ''), true, 301);
                 exit;
             }
+
+            app_track_view($pdo, (string) $slug);
+            $app_view_count = app_view_count($pdo, (string) $slug);
 
             try {
                 $app_categories = fetch_app_category_labels($pdo, $slug, current_lang_key());
@@ -232,6 +236,7 @@ include 'includes/header.php';
           <?php $createdDate = date('Y-m-d', strtotime((string)$app['created_at'])); ?>
           <span class="badge"><?= h($createdDate) ?></span>
         <?php endif; ?>
+        <span class="badge"><?= h(number_format($app_view_count)) ?> <?= h(ui_label('label.views', 'views')) ?></span>
       </div>
       <div class="app-hero-actions">
         <?php foreach ($stores as $key => $url): ?>
