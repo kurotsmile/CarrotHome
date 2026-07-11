@@ -1,5 +1,36 @@
 </main>
 <?php
+if (!function_exists('home_footer_sites')) {
+    function home_footer_sites(?PDO $pdo): array
+    {
+        if (!$pdo instanceof PDO) {
+            return [];
+        }
+
+        try {
+            $stmt = $pdo->query("SELECT name, url, logo, description FROM sites WHERE COALESCE(url, '') <> '' ORDER BY sort_order ASC, name ASC LIMIT 10");
+            return $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
+        } catch (Throwable $e) {
+            return [];
+        }
+    }
+}
+
+if (!function_exists('home_footer_excerpt')) {
+    function home_footer_excerpt(?string $text, int $limit = 54): string
+    {
+        $text = trim(strip_tags((string) $text));
+        if ($text === '') {
+            return '';
+        }
+        if (function_exists('mb_strimwidth')) {
+            return mb_strimwidth($text, 0, $limit, '...');
+        }
+        return strlen($text) > $limit ? substr($text, 0, $limit - 3) . '...' : $text;
+    }
+}
+
+$footer_sites = home_footer_sites($GLOBALS['pdo'] ?? null);
 $footer_page_columns = [
     'footer.company' => [
         'about' => ['footer.about', 'About'],
@@ -21,7 +52,7 @@ $footer_page_columns = [
       <p><?= h(ui_label('footer.description', 'Kho app và game được sắp xếp gọn gàng, dễ tìm, dễ tải cho nhiều nền tảng.')) ?></p>
     </div>
 
-    <nav class="footer-menu" aria-label="<?= h(ui_label('aria.footer_navigation', 'Footer navigation')) ?>">
+    <nav class="footer-menu<?= $footer_sites ? ' has-sites' : '' ?>" aria-label="<?= h(ui_label('aria.footer_navigation', 'Footer navigation')) ?>">
       <div class="footer-column">
         <h2><?= h(ui_label('nav.explore', 'Explore')) ?></h2>
         <a href="<?= h(base_url('index.php')) ?>"><?= h(ui_label('nav.home', 'Home')) ?></a>
@@ -38,6 +69,37 @@ $footer_page_columns = [
           <?php endforeach; ?>
         </div>
       <?php endforeach; ?>
+      <?php if ($footer_sites): ?>
+        <div class="footer-column footer-sites">
+          <h2><?= h(ui_label('footer.sites', 'Sites')) ?></h2>
+          <?php foreach ($footer_sites as $site): ?>
+            <?php
+            $site_name = trim((string)($site['name'] ?? ''));
+            $site_url = trim((string)($site['url'] ?? ''));
+            $site_logo = trim((string)($site['logo'] ?? ''));
+            $site_description = home_footer_excerpt($site['description'] ?? '', 54);
+            if ($site_name === '' || $site_url === '') {
+                continue;
+            }
+            ?>
+            <a class="footer-site-link" href="<?= h($site_url) ?>" target="_blank" rel="noopener noreferrer">
+              <?php if ($site_logo !== ''): ?>
+                <img src="<?= h($site_logo) ?>" alt="" loading="lazy">
+              <?php else: ?>
+                <span class="footer-site-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0 0c2.4-2.3 3.6-5.3 3.6-9S14.4 5.3 12 3m0 18c-2.4-2.3-3.6-5.3-3.6-9S9.6 5.3 12 3M3.6 9h16.8M3.6 15h16.8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                </span>
+              <?php endif; ?>
+              <span>
+                <strong><?= h($site_name) ?></strong>
+                <?php if ($site_description !== ''): ?>
+                  <small><?= h($site_description) ?></small>
+                <?php endif; ?>
+              </span>
+            </a>
+          <?php endforeach; ?>
+        </div>
+      <?php endif; ?>
     </nav>
   </div>
 

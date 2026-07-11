@@ -187,7 +187,7 @@ include __DIR__ . '/includes/header.php';
     <div class="paypal-result-main">
       <?php if ($errorMessage): ?>
         <span class="paypal-result-status is-error"><?= h(ui_label('paypal.status_error', 'Payment issue')) ?></span>
-        <h1><?= h(ui_label('paypal.result_error_title', 'Không thể xác nhận đơn hàng')) ?></h1>
+        <h1><?= h(ui_label('paypal.result_error_title', 'Unable to confirm the order')) ?></h1>
         <p><?= h($errorMessage) ?></p>
       <?php elseif ($isCompleted): ?>
         <span class="paypal-result-status"><?= h(ui_label('paypal.status_completed', 'Payment completed')) ?></span>
