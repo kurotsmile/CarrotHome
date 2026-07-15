@@ -1,3 +1,4 @@
 - nếu thay đổi về style css thì thêm tham số ?v để làm mới cache ví dụ style.css?v1 và các file liên quan
 - hạng chế sinh hàm con chỉ sử dụng một lần mà gộp vào hàm cha xử lý chung
 - Khi làm việc cần rà lại CarrotAdmin vì đây là dự án quảng lý chung có thể có logic liên quan đến tác vụ
+- khi cần kiểm tra cập nhận mysql database thì hãy kiểm tra ở /Applications/XAMPP/xamppfiles/bin/mysql -h 192.168.1.8"

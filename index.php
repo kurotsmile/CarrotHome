@@ -56,7 +56,7 @@ $error_message = $db_error ?? '';
 $search = trim($_GET['q'] ?? '');
 $type = trim($_GET['type'] ?? 'all');
 $status = trim($_GET['status'] ?? '');
-$sort = trim((string) ($_GET['sort'] ?? 'new'));
+$sort = trim((string) ($_GET['sort'] ?? 'trending'));
 $dir = strtolower(trim((string) ($_GET['dir'] ?? 'desc')));
 $sort_options = [
     'new' => ['label' => ui_label('sort.new', 'new'), 'default_dir' => 'desc'],
@@ -64,7 +64,7 @@ $sort_options = [
     'views' => ['label' => ui_label('sort.views', 'xem nhiều nhất'), 'default_dir' => 'desc'],
 ];
 if (!isset($sort_options[$sort])) {
-    $sort = 'new';
+    $sort = 'trending';
 }
 if (!in_array($dir, ['asc', 'desc'], true)) {
     $dir = $sort_options[$sort]['default_dir'];
@@ -93,12 +93,6 @@ if ($pdo) {
         $params = [];
         $lang_key = current_lang_key();
         $params[':lang_key'] = $lang_key;
-        $has_app_view_table = true;
-        try {
-            $pdo->query('SELECT 1 FROM app_view LIMIT 1');
-        } catch (Throwable $viewTableError) {
-            $has_app_view_table = false;
-        }
 
         if ($status === '') {
             $status = 'public';
@@ -122,47 +116,77 @@ if ($pdo) {
             $params[':search_title'] = $search_value;
         }
 
-        $where_sql = count($where) ? 'WHERE ' . implode(' AND ', $where) : '';
-        $order_dir = $dir === 'asc' ? 'ASC' : 'DESC';
-        $order_by = 'a.created_at ' . $order_dir . ', a.priority DESC, a.id ASC';
-        if ($sort === 'trending') {
-            $order_by = 'a.priority ' . $order_dir . ', a.created_at DESC, a.id ASC';
-        } elseif ($sort === 'views') {
-            $order_by = 'view_count ' . $order_dir . ', a.priority DESC, a.created_at DESC, a.id ASC';
-        }
+        $cache_ttl = $search === '' ? 86400 : 900;
+        $cache_key = carrot_cache_key('home_apps', [
+            'lang' => $lang_key,
+            'type' => $type,
+            'status' => $status,
+            'sort' => $sort,
+            'dir' => $dir,
+            'q' => $search !== '' ? sha1($search) : '',
+        ]);
 
-        $count_stmt = $pdo->prepare("
-            SELECT COUNT(DISTINCT a.id)
-            FROM app a
-            LEFT JOIN app_content ac
-              ON ac.app_id = a.id AND ac.lang_key = :lang_key
-            {$where_sql}
-        ");
-        $count_stmt->execute($params);
-        $total_apps = (int)$count_stmt->fetchColumn();
+        $cached_home = carrot_cache_get($cache_key, $cache_ttl);
+        if (is_array($cached_home)) {
+            $apps = is_array($cached_home['apps'] ?? null) ? $cached_home['apps'] : [];
+            $total_apps = (int)($cached_home['total_apps'] ?? 0);
+        } else {
 
-        $view_join_sql = $has_app_view_table
-            ? "SELECT app_id, COUNT(*) AS view_count FROM app_view GROUP BY app_id"
-            : "SELECT '' AS app_id, 0 AS view_count WHERE 1 = 0";
+            $where_sql = count($where) ? 'WHERE ' . implode(' AND ', $where) : '';
+            $order_dir = $dir === 'asc' ? 'ASC' : 'DESC';
+            $order_by = 'a.created_at ' . $order_dir . ', a.priority DESC, a.id ASC';
+            if ($sort === 'trending') {
+                $order_by = 'a.priority ' . $order_dir . ', a.created_at DESC, a.id ASC';
+            } elseif ($sort === 'views') {
+                $order_by = 'view_count ' . $order_dir . ', a.priority DESC, a.created_at DESC, a.id ASC';
+            }
 
-        $sql = "SELECT a.id, a.id AS slug, a.decription, a.github, a.microsoft_store, a.icon, a.itch, a.exe_file, a.ipa_file, a.deb_file,
-                       a.amazon_app_store, a.huawei_store, a.youtube_link, a.google_play, a.dmg_file, a.uptodown,
-                       a.simmer, a.type, a.apk_file, a.status, a.priority, a.price, a.category, a.created_at,
-                       ac.title AS app_content_title,
-                       COALESCE(av.view_count, 0) AS view_count
+            $count_stmt = $pdo->prepare("
+                SELECT COUNT(DISTINCT a.id)
                 FROM app a
                 LEFT JOIN app_content ac
                   ON ac.app_id = a.id AND ac.lang_key = :lang_key
-                LEFT JOIN (
-                  {$view_join_sql}
-                ) av ON av.app_id = a.id
                 {$where_sql}
-                ORDER BY {$order_by}
-                LIMIT 120";
+            ");
+            $count_stmt->execute($params);
+            $total_apps = (int)$count_stmt->fetchColumn();
 
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute($params);
-        $apps = $stmt->fetchAll();
+            $has_app_view_table = true;
+            try {
+                $pdo->query('SELECT 1 FROM app_view LIMIT 1');
+            } catch (Throwable $viewTableError) {
+                $has_app_view_table = false;
+            }
+
+            $view_join_sql = $has_app_view_table
+                ? "SELECT app_id, COUNT(*) AS view_count FROM app_view GROUP BY app_id"
+                : "SELECT '' AS app_id, 0 AS view_count WHERE 1 = 0";
+
+            $sql = "SELECT a.id, a.id AS slug, a.decription, a.github, a.microsoft_store, a.icon, a.itch, a.exe_file, a.ipa_file, a.deb_file,
+                           a.amazon_app_store, a.huawei_store, a.youtube_link, a.google_play, a.dmg_file, a.uptodown,
+                           a.simmer, a.type, a.apk_file, a.status, a.priority, a.price, a.category, a.created_at,
+                           ac.title AS app_content_title,
+                           COALESCE(av.view_count, 0) AS view_count
+                    FROM app a
+                    LEFT JOIN app_content ac
+                      ON ac.app_id = a.id AND ac.lang_key = :lang_key
+                    LEFT JOIN (
+                      {$view_join_sql}
+                    ) av ON av.app_id = a.id
+                    {$where_sql}
+                    ORDER BY {$order_by}
+                    LIMIT 120";
+
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($params);
+            $apps = $stmt->fetchAll();
+
+            carrot_cache_set($cache_key, [
+                'created_at' => date('c'),
+                'total_apps' => $total_apps,
+                'apps' => $apps,
+            ]);
+        }
     } catch (Throwable $e) {
         $error_message = $e->getMessage();
     }

@@ -3,6 +3,87 @@ function h($value) {
     return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
 }
 
+function carrot_cache_dir(): string
+{
+    return dirname(__DIR__) . '/storage/cache';
+}
+
+function carrot_cache_key(string $prefix, array $parts): string
+{
+    $readable = [];
+    foreach ($parts as $key => $value) {
+        $value = trim((string)$value);
+        if ($value === '') {
+            $value = '0';
+        }
+        $readable[] = preg_replace('/[^a-z0-9_-]+/i', '-', (string)$key) . '-' . preg_replace('/[^a-z0-9_-]+/i', '-', strtolower($value));
+    }
+
+    return preg_replace('/[^a-z0-9_-]+/i', '-', $prefix) . '_' . implode('_', $readable) . '_' . substr(sha1(json_encode($parts, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)), 0, 12);
+}
+
+function carrot_cache_path(string $key): string
+{
+    $key = preg_replace('/[^a-z0-9_.-]+/i', '-', $key);
+    return carrot_cache_dir() . '/' . $key . '.json';
+}
+
+function carrot_cache_get(string $key, int $ttl_seconds): ?array
+{
+    if ($ttl_seconds <= 0) {
+        return null;
+    }
+
+    $path = carrot_cache_path($key);
+    if (!is_file($path) || (time() - (int)filemtime($path)) > $ttl_seconds) {
+        return null;
+    }
+
+    $payload = json_decode((string)@file_get_contents($path), true);
+    return is_array($payload) ? $payload : null;
+}
+
+function carrot_cache_set(string $key, array $payload): void
+{
+    $dir = carrot_cache_dir();
+    if (!is_dir($dir)) {
+        @mkdir($dir, 0775, true);
+    }
+    if (!is_dir($dir) || !is_writable($dir)) {
+        return;
+    }
+
+    $path = carrot_cache_path($key);
+    $tmp = $path . '.' . getmypid() . '.tmp';
+    $json = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    if ($json === false) {
+        return;
+    }
+
+    if (@file_put_contents($tmp, $json, LOCK_EX) !== false) {
+        @rename($tmp, $path);
+    }
+}
+
+function carrot_cache_clear(string $prefix = ''): int
+{
+    $dir = carrot_cache_dir();
+    if (!is_dir($dir)) {
+        return 0;
+    }
+
+    $prefix = preg_replace('/[^a-z0-9_.-]+/i', '-', $prefix);
+    $pattern = $dir . '/' . ($prefix !== '' ? $prefix . '*' : '*') . '.json';
+    $deleted = 0;
+    foreach (glob($pattern) ?: [] as $file) {
+        if (is_file($file) && @unlink($file)) {
+            $deleted++;
+        }
+    }
+
+    return $deleted;
+}
+
 function initialize_language_from_ip($pdo = null) {
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
