@@ -3,6 +3,131 @@ function h($value) {
     return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
 }
 
+function carrot_site_key(): string
+{
+    if (defined('CARROT_SITE_KEY')) {
+        return (string) CARROT_SITE_KEY;
+    }
+
+    return 'CarrotHome';
+}
+
+function carrot_site_aliases(string $site_key = ''): array
+{
+    $site_key = trim($site_key) !== '' ? trim($site_key) : carrot_site_key();
+    $aliases = [$site_key];
+
+    if (defined('CARROT_SITE_ALIASES') && is_array(CARROT_SITE_ALIASES)) {
+        $aliases = array_merge($aliases, CARROT_SITE_ALIASES);
+    }
+
+    return array_values(array_unique(array_filter(array_map(static function ($value): string {
+        return strtolower(trim((string) $value));
+    }, $aliases))));
+}
+
+function carrot_site_url_hosts(string $site_key = ''): array
+{
+    $site_key = strtolower(trim($site_key) !== '' ? trim($site_key) : carrot_site_key());
+    $hosts = [];
+    $map = [
+        'carrothome' => ['home.carrot28.com'],
+        'carrotmusic' => ['music.carrot28.com'],
+        'carrotcoc' => ['coc.carrot28.com'],
+    ];
+
+    foreach ($map[$site_key] ?? [] as $host) {
+        $hosts[] = strtolower($host);
+    }
+
+    $currentHost = strtolower(trim((string) ($_SERVER['HTTP_HOST'] ?? '')));
+    if ($currentHost !== '') {
+        $hosts[] = preg_replace('/:\d+$/', '', $currentHost);
+    }
+
+    return array_values(array_unique(array_filter($hosts)));
+}
+
+function carrot_site_id(PDO $pdo, string $site_key = ''): ?int
+{
+    static $cache = [];
+
+    $site_key = trim($site_key) !== '' ? trim($site_key) : carrot_site_key();
+    $cacheKey = strtolower($site_key);
+    if (array_key_exists($cacheKey, $cache)) {
+        return $cache[$cacheKey];
+    }
+
+    try {
+        $aliases = carrot_site_aliases($site_key);
+        if ($aliases) {
+            $placeholders = implode(',', array_fill(0, count($aliases), '?'));
+            $stmt = $pdo->prepare('SELECT id FROM sites WHERE LOWER(name) IN (' . $placeholders . ') ORDER BY sort_order ASC, id ASC LIMIT 1');
+            $stmt->execute($aliases);
+            $siteId = (int) $stmt->fetchColumn();
+            if ($siteId > 0) {
+                return $cache[$cacheKey] = $siteId;
+            }
+        }
+
+        foreach (carrot_site_url_hosts($site_key) as $host) {
+            $stmt = $pdo->prepare('SELECT id FROM sites WHERE LOWER(url) LIKE ? ORDER BY sort_order ASC, id ASC LIMIT 1');
+            $stmt->execute(['%' . $host . '%']);
+            $siteId = (int) $stmt->fetchColumn();
+            if ($siteId > 0) {
+                return $cache[$cacheKey] = $siteId;
+            }
+        }
+    } catch (Throwable $e) {
+        return $cache[$cacheKey] = null;
+    }
+
+    return $cache[$cacheKey] = null;
+}
+
+function carrot_api_config(PDO $pdo, string $provider, string $site_key = ''): ?array
+{
+    $provider = trim($provider);
+    if ($provider === '') {
+        return null;
+    }
+
+    try {
+        $siteId = carrot_site_id($pdo, $site_key);
+        if ($siteId !== null) {
+            $stmt = $pdo->prepare('
+                SELECT *
+                FROM api_config
+                WHERE provider = ?
+                  AND enabled = 1
+                  AND (site_id = ? OR site_id IS NULL OR site_id = 0)
+                ORDER BY CASE WHEN site_id = ? THEN 0 ELSE 1 END, id DESC
+                LIMIT 1
+            ');
+            $stmt->execute([$provider, $siteId, $siteId]);
+        } else {
+            $stmt = $pdo->prepare('
+                SELECT *
+                FROM api_config
+                WHERE provider = ?
+                  AND enabled = 1
+                  AND (site_id IS NULL OR site_id = 0)
+                ORDER BY id DESC
+                LIMIT 1
+            ');
+            $stmt->execute([$provider]);
+        }
+
+        $config = $stmt->fetch();
+        return $config ?: null;
+    } catch (Throwable $e) {
+        $stmt = $pdo->prepare('SELECT * FROM api_config WHERE provider = ? AND enabled = 1 ORDER BY id DESC LIMIT 1');
+        $stmt->execute([$provider]);
+        $config = $stmt->fetch();
+        return $config ?: null;
+    }
+}
+
 function carrot_cache_dir(): string
 {
     return dirname(__DIR__) . '/storage/cache';

@@ -8,7 +8,13 @@ if (!function_exists('home_footer_sites')) {
         }
 
         try {
-            $stmt = $pdo->query("SELECT name, url, logo, description FROM sites WHERE COALESCE(url, '') <> '' ORDER BY sort_order ASC, name ASC LIMIT 10");
+            static $hasStatus = null;
+            if ($hasStatus === null) {
+                $columns = $pdo->query('SHOW COLUMNS FROM sites')->fetchAll(PDO::FETCH_COLUMN);
+                $hasStatus = in_array('status', $columns, true);
+            }
+            $statusWhere = $hasStatus ? " AND COALESCE(status, 'active') = 'active'" : '';
+            $stmt = $pdo->query("SELECT name, url, logo, description FROM sites WHERE COALESCE(url, '') <> ''{$statusWhere} ORDER BY sort_order ASC, name ASC LIMIT 10");
             return $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
         } catch (Throwable $e) {
             return [];

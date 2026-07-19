@@ -1,5 +1,11 @@
 <?php
 session_start();
+if (!defined('CARROT_SITE_KEY')) {
+    define('CARROT_SITE_KEY', 'CarrotHome');
+}
+if (!defined('CARROT_SITE_ALIASES')) {
+    define('CARROT_SITE_ALIASES', ['CarrotHome', 'Home', 'home.carrot28.com']);
+}
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/includes/functions.php';
 

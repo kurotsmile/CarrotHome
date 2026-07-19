@@ -12,7 +12,10 @@ initialize_language_from_ip($pdo ?? null);
 
 visit_track_daily_ip($pdo ?? null);
 
-$slug = trim($_GET['slug'] ?? '');
+$slug = trim((string) ($_GET['slug'] ?? ''));
+if ($slug === '' && strtolower(trim((string) ($_GET['page'] ?? ''))) === 'app') {
+    $slug = trim((string) ($_GET['id'] ?? ''));
+}
 $slug_candidates = slug_lookup_candidates($slug);
 $app = null;
 $images = [];
@@ -58,7 +61,7 @@ if ($pdo) {
             $request_path = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?: '';
             if ($request_path !== '' && basename($request_path) !== 'app.php' && $request_path !== $canonical_path) {
                 $query = $_GET;
-                unset($query['slug']);
+                unset($query['slug'], $query['page'], $query['id']);
                 header('Location: ' . $canonical_path . (count($query) ? '?' . http_build_query($query) : ''), true, 301);
                 exit;
             }

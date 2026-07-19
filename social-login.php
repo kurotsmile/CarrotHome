@@ -1,5 +1,11 @@
 <?php
 session_start();
+if (!defined('CARROT_SITE_KEY')) {
+    define('CARROT_SITE_KEY', 'CarrotHome');
+}
+if (!defined('CARROT_SITE_ALIASES')) {
+    define('CARROT_SITE_ALIASES', ['CarrotHome', 'Home', 'home.carrot28.com']);
+}
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/includes/functions.php';
 
@@ -27,9 +33,7 @@ if (!$pdo instanceof PDO) {
     social_login_error($db_error ?? 'Không thể kết nối database.');
 }
 
-$stmt = $pdo->prepare('SELECT * FROM api_config WHERE provider = ? AND enabled = 1 ORDER BY id DESC LIMIT 1');
-$stmt->execute([$provider]);
-$config = $stmt->fetch();
+$config = carrot_api_config($pdo, $provider, CARROT_SITE_KEY);
 if (!$config) {
     social_login_error('Chưa bật API config cho ' . $provider . '.');
 }

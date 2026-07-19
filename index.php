@@ -5,6 +5,12 @@ require_once __DIR__ . '/includes/visit_tracker.php';
 
 initialize_language_from_ip($pdo ?? null);
 
+if (isset($_GET['page']) && strtolower(trim((string) $_GET['page'])) === 'app') {
+    $_GET['slug'] = trim((string) ($_GET['id'] ?? ($_GET['slug'] ?? '')));
+    include __DIR__ . '/app.php';
+    exit;
+}
+
 if (isset($_GET['page'])) {
     $_GET['slug'] = trim($_GET['page']);
     include __DIR__ . '/page.php';
