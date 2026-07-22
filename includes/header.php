@@ -80,6 +80,7 @@ $current_key_lang = $current_country['lang_key'] ?? ($current_key_lang ?: 'en');
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title><?= h($page_title) ?></title>
 <meta name="description" content="<?= h($page_description) ?>">
+<?= carrot_google_search_verification_meta($pdo ?? null, 'CarrotHome') ?>
 <meta name="theme-color" content="#ff5900">
 <link rel="apple-touch-icon" sizes="180x180" href="<?= h(base_url('favicon/apple-touch-icon.png')) ?>">
 <link rel="icon" type="image/png" sizes="32x32" href="<?= h(base_url('favicon/favicon-32x32.png')) ?>">

@@ -11,6 +11,8 @@ $mode = ($_POST['mode'] ?? $_GET['mode'] ?? 'login') === 'register' ? 'register'
 $social_provider = trim((string)($_GET['auth'] ?? ''));
 $email = trim($_POST['email'] ?? '');
 $name = trim($_POST['name'] ?? '');
+$redirect_target = carrot_login_redirect_target('index.php');
+$_SESSION['home_login_redirect'] = $redirect_target;
 
 if (!empty($_GET['oauth_error'])) {
     $error_message = trim((string)$_GET['oauth_error']);
@@ -19,12 +21,12 @@ if (!empty($_GET['oauth_error'])) {
 
 if (isset($_GET['logout'])) {
     unset($_SESSION['home_user_id'], $_SESSION['home_user_name'], $_SESSION['home_user_email'], $_SESSION['home_user_role'], $_SESSION['home_user_avatar']);
-    header('Location: login.php');
+    header('Location: login.php?' . http_build_query(['redirect' => $redirect_target]));
     exit;
 }
 
 if ($social_provider !== '') {
-    header('Location: social-login.php?provider=' . rawurlencode($social_provider));
+    header('Location: social-login.php?' . http_build_query(['provider' => $social_provider, 'redirect' => $redirect_target]));
     exit;
 }
 
@@ -76,7 +78,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['home_user_email'] = $email;
                 $_SESSION['home_user_role'] = 'user';
                 $_SESSION['home_user_avatar'] = '';
-                $success_message = ui_label('register.success', 'Đăng ký thành công.');
+                unset($_SESSION['home_login_redirect']);
+                header('Location: ' . $redirect_target);
+                exit;
         } catch (Throwable $e) {
             $error_message = $e->getMessage();
         }
@@ -110,7 +114,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['home_user_email'] = (string)($user['email'] ?? '');
             $_SESSION['home_user_role'] = (string)($user['role'] ?? 'user');
             $_SESSION['home_user_avatar'] = (string)($user['avatar'] ?? '');
-            $success_message = ui_label('login.success', 'Đăng nhập thành công.');
+            unset($_SESSION['home_login_redirect']);
+            header('Location: ' . $redirect_target);
+            exit;
         } catch (Throwable $e) {
             $error_message = $e->getMessage();
         }
@@ -147,18 +153,19 @@ $register_form_open = $mode === 'register' && $_SERVER['REQUEST_METHOD'] === 'PO
         <h1><?= h(ui_label('login.logged_in_title', 'You are logged in')) ?></h1>
         <p><?= h($_SESSION['home_user_name'] ?: $_SESSION['home_user_email']) ?></p>
         <div class="login-actions">
-          <a class="login-submit" href="<?= h(base_url('index.php')) ?>"><?= h(ui_label('action.back_home', 'Back home')) ?></a>
-          <a class="login-secondary" href="login.php?logout=1"><?= h(ui_label('action.logout', 'Logout')) ?></a>
+          <a class="login-submit" href="<?= h($redirect_target) ?>"><?= h(ui_label('action.back_home', 'Back home')) ?></a>
+          <a class="login-secondary" href="<?= h('login.php?' . http_build_query(['logout' => 1, 'redirect' => $redirect_target])) ?>"><?= h(ui_label('action.logout', 'Logout')) ?></a>
         </div>
       </div>
     <?php else: ?>
       <div class="login-tabs" role="tablist" aria-label="<?= h(ui_label('login.tabs', 'Account access')) ?>">
-        <a class="<?= $mode === 'login' ? 'is-active' : '' ?>" href="login.php"><?= h(ui_label('nav.login', 'Login')) ?></a>
-        <a class="<?= $mode === 'register' ? 'is-active' : '' ?>" href="login.php?mode=register"><?= h(ui_label('nav.register', 'Register')) ?></a>
+        <a class="<?= $mode === 'login' ? 'is-active' : '' ?>" href="<?= h('login.php?' . http_build_query(['redirect' => $redirect_target])) ?>"><?= h(ui_label('nav.login', 'Login')) ?></a>
+        <a class="<?= $mode === 'register' ? 'is-active' : '' ?>" href="<?= h('login.php?' . http_build_query(['mode' => 'register', 'redirect' => $redirect_target])) ?>"><?= h(ui_label('nav.register', 'Register')) ?></a>
       </div>
 
       <form class="login-form <?= $mode === 'register' ? 'is-register-mode' : '' ?>" method="post">
         <input type="hidden" name="mode" value="<?= h($mode) ?>">
+        <input type="hidden" name="redirect" value="<?= h($redirect_target) ?>">
         <h1><?= h($mode === 'register' ? ui_label('nav.register', 'Register') : ui_label('nav.login', 'Login')) ?></h1>
         <p><?= h($mode === 'register' ? ui_label('register.intro', 'Create your CarrotHome account.') : ui_label('login.intro', 'Sign in to your CarrotHome account.')) ?></p>
 
@@ -170,15 +177,15 @@ $register_form_open = $mode === 'register' && $_SERVER['REQUEST_METHOD'] === 'PO
         <?php endif; ?>
 
         <div class="social-auth-grid">
-          <a class="social-auth-button" href="social-login.php?provider=google" aria-label="Google">
+          <a class="social-auth-button" href="<?= h('social-login.php?' . http_build_query(['provider' => 'google', 'redirect' => $redirect_target])) ?>" aria-label="Google">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285f4" d="M21.6 12.2c0-.7-.1-1.3-.2-1.8H12v3.5h5.4c-.2 1.1-.9 2.1-1.9 2.7v2.2h3c1.8-1.6 3.1-3.9 3.1-6.6Z"/><path fill="#34a853" d="M12 22c2.7 0 5-0.9 6.6-2.5l-3-2.2c-.8.5-1.9.9-3.6.9-2.6 0-4.8-1.7-5.6-4.1H3.3v2.3C4.9 19.7 8.2 22 12 22Z"/><path fill="#fbbc05" d="M6.4 14.1c-.2-.6-.3-1.3-.3-2.1s.1-1.4.3-2.1V7.6H3.3C2.5 8.9 2.1 10.4 2.1 12s.4 3.1 1.2 4.4l3.1-2.3Z"/><path fill="#ea4335" d="M12 5.8c1.5 0 2.8.5 3.8 1.5l2.8-2.8C17 2.9 14.7 2 12 2 8.2 2 4.9 4.3 3.3 7.6l3.1 2.3c.8-2.4 3-4.1 5.6-4.1Z"/></svg>
             <span>Google</span>
           </a>
-          <a class="social-auth-button" href="social-login.php?provider=twitter_x" aria-label="X">
+          <a class="social-auth-button" href="<?= h('social-login.php?' . http_build_query(['provider' => 'twitter_x', 'redirect' => $redirect_target])) ?>" aria-label="X">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M18.3 2.8h3.3l-7.2 8.2 8.5 10.2h-6.6l-5.2-6.2-6 6.2H1.8l7.7-8.7L1.4 2.8h6.8l4.7 5.7 5.4-5.7Zm-1.2 16.6h1.8L7.2 4.5H5.3l11.8 14.9Z"/></svg>
             <span>X</span>
           </a>
-          <a class="social-auth-button" href="social-login.php?provider=github" aria-label="GitHub">
+          <a class="social-auth-button" href="<?= h('social-login.php?' . http_build_query(['provider' => 'github', 'redirect' => $redirect_target])) ?>" aria-label="GitHub">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-3.2 19.5c.5.1.7-.2.7-.5v-1.8c-2.9.6-3.5-1.2-3.5-1.2-.5-1.1-1.1-1.4-1.1-1.4-.9-.6.1-.6.1-.6 1 0 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8.1-.6.3-1.1.6-1.3-2.3-.3-4.7-1.1-4.7-5A3.9 3.9 0 0 1 6.4 8.7c-.1-.3-.5-1.3.1-2.7 0 0 .8-.3 2.8 1a9.6 9.6 0 0 1 5.2 0c2-1.3 2.8-1 2.8-1 .6 1.4.2 2.4.1 2.7a3.9 3.9 0 0 1 1.1 2.8c0 3.9-2.4 4.7-4.7 5 .4.3.7.9.7 1.8V21c0 .3.2.6.7.5A10 10 0 0 0 12 2Z"/></svg>
             <span>GitHub</span>
           </a>

@@ -11,7 +11,7 @@ function sitemap_site_url() {
         $scheme = 'https';
     }
 
-    $host = $_SERVER['HTTP_HOST'] ?? 'home.carrot28.com';
+    $host = $_SERVER['HTTP_HOST'] ?? 'carrot28.com';
     return $scheme . '://' . $host;
 }
 

@@ -31,9 +31,11 @@ function carrot_site_url_hosts(string $site_key = ''): array
     $site_key = strtolower(trim($site_key) !== '' ? trim($site_key) : carrot_site_key());
     $hosts = [];
     $map = [
-        'carrothome' => ['home.carrot28.com'],
-        'carrotmusic' => ['music.carrot28.com'],
+        'carrothome' => ['carrot28.com', 'home.carrot28.com'],
+        'carrotmusic' => ['heartbeatplay.com', 'music.carrot28.com'],
+        'carrotebook' => ['ebook.carrot28.com'],
         'carrotcoc' => ['coc.carrot28.com'],
+        'carrotcloud' => ['cloud.carrot28.com'],
     ];
 
     foreach ($map[$site_key] ?? [] as $host) {
@@ -126,6 +128,41 @@ function carrot_api_config(PDO $pdo, string $provider, string $site_key = ''): ?
         $config = $stmt->fetch();
         return $config ?: null;
     }
+}
+
+function carrot_google_search_verification_meta(?PDO $pdo, string $site_key = ''): string
+{
+    if (!$pdo instanceof PDO) {
+        return '';
+    }
+
+    try {
+        $siteId = carrot_site_id($pdo, $site_key);
+        if ($siteId === null) {
+            return '';
+        }
+
+        $stmt = $pdo->prepare("
+            SELECT verification_code
+            FROM sites_google_search_verifications
+            WHERE site_id = ? AND COALESCE(status, 'active') = 'active' AND COALESCE(verification_code, '') <> ''
+            ORDER BY sort_order ASC, id ASC
+        ");
+        $stmt->execute([$siteId]);
+        $codes = $stmt->fetchAll(PDO::FETCH_COLUMN);
+    } catch (Throwable $e) {
+        return '';
+    }
+
+    $meta = [];
+    foreach ($codes as $code) {
+        $code = trim((string) $code);
+        if ($code !== '') {
+            $meta[] = '<meta name="google-site-verification" content="' . h($code) . '">';
+        }
+    }
+
+    return implode("\n", $meta);
 }
 
 function carrot_cache_dir(): string
@@ -395,6 +432,56 @@ function base_url($path = '') {
     return '/' . $path;
 }
 
+function carrot_allowed_redirect_hosts(): array
+{
+    $hosts = [
+        'carrot28.com',
+        'home.carrot28.com',
+        'ebook.carrot28.com',
+        'music.carrot28.com',
+        'heartbeatplay.com',
+        'coc.carrot28.com',
+        'cloud.carrot28.com',
+        'localhost',
+        '127.0.0.1',
+    ];
+    $currentHost = strtolower(trim((string) ($_SERVER['HTTP_HOST'] ?? '')));
+    if ($currentHost !== '') {
+        $hosts[] = preg_replace('/:\d+$/', '', $currentHost);
+    }
+
+    return array_values(array_unique(array_filter($hosts)));
+}
+
+function carrot_safe_redirect_target(?string $target, string $fallback = 'index.php'): string
+{
+    $target = trim((string) $target);
+    if ($target === '' || strpos($target, "\n") !== false || strpos($target, "\r") !== false) {
+        return $fallback;
+    }
+    if (preg_match('~^//~', $target)) {
+        return $fallback;
+    }
+
+    $scheme = strtolower((string) (parse_url($target, PHP_URL_SCHEME) ?: ''));
+    if ($scheme !== '') {
+        if (!in_array($scheme, ['http', 'https'], true)) {
+            return $fallback;
+        }
+        $host = strtolower((string) (parse_url($target, PHP_URL_HOST) ?: ''));
+        $host = preg_replace('/:\d+$/', '', $host);
+        return in_array($host, carrot_allowed_redirect_hosts(), true) ? $target : $fallback;
+    }
+
+    return $target;
+}
+
+function carrot_login_redirect_target(string $fallback = 'index.php'): string
+{
+    $target = $_POST['redirect'] ?? $_GET['redirect'] ?? '';
+    return carrot_safe_redirect_target((string) $target, $fallback);
+}
+
 function seo_slug_text($slug) {
     $slug = trim((string)$slug);
     return preg_replace('/\s+/u', '-', $slug);
@@ -406,14 +493,28 @@ function seo_slug_encode($slug) {
 
 function slug_lookup_candidates($slug) {
     $decoded = trim(rawurldecode((string)$slug));
-    $candidates = [$decoded];
+    $candidates = [];
+    $add_candidate = static function ($value) use (&$candidates) {
+        $value = trim((string)$value);
+        if ($value !== '') {
+            $candidates[] = $value;
+        }
+    };
+
+    $add_candidate($decoded);
 
     if (strpos($decoded, '+') !== false) {
-        $candidates[] = str_replace('+', ' ', $decoded);
+        $add_candidate(str_replace('+', ' ', $decoded));
     }
 
     if (strpos($decoded, '-') !== false) {
-        $candidates[] = str_replace('-', ' ', $decoded);
+        $add_candidate(str_replace('-', '_', $decoded));
+        $add_candidate(str_replace('-', ' ', $decoded));
+    }
+
+    if (strpos($decoded, '_') !== false) {
+        $add_candidate(str_replace('_', '-', $decoded));
+        $add_candidate(str_replace('_', ' ', $decoded));
     }
 
     return array_values(array_unique(array_filter($candidates, static function ($value) {

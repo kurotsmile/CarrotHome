@@ -77,7 +77,7 @@ $footer_page_columns = [
       <?php endforeach; ?>
       <?php if ($footer_sites): ?>
         <div class="footer-column footer-sites">
-          <h2><?= h(ui_label('footer.sites', 'Sites')) ?></h2>
+          <h2><?= h(ui_label('footer.ecosystem', 'Sites')) ?></h2>
           <?php foreach ($footer_sites as $site): ?>
             <?php
             $site_name = trim((string)($site['name'] ?? ''));

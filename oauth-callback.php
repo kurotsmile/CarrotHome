@@ -4,7 +4,7 @@ if (!defined('CARROT_SITE_KEY')) {
     define('CARROT_SITE_KEY', 'CarrotHome');
 }
 if (!defined('CARROT_SITE_ALIASES')) {
-    define('CARROT_SITE_ALIASES', ['CarrotHome', 'Home', 'home.carrot28.com']);
+    define('CARROT_SITE_ALIASES', ['CarrotHome', 'Home', 'carrot28.com', 'home.carrot28.com']);
 }
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/includes/functions.php';
@@ -21,6 +21,11 @@ function oauth_callback_redirect_error(string $message): void
 {
     header('Location: login.php?mode=register&oauth_error=' . rawurlencode($message));
     exit;
+}
+
+function oauth_callback_redirect_after_login(): string
+{
+    return carrot_safe_redirect_target($_SESSION['oauth_redirect_after_login'] ?? ($_SESSION['home_login_redirect'] ?? ''), 'index.php');
 }
 
 function oauth_callback_request(string $url, array $options = []): array
@@ -148,7 +153,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'supab
             $provider,
             (string)($metadata['avatar_url'] ?? $metadata['picture'] ?? '')
         );
-        oauth_callback_json(['success' => true, 'redirect' => 'index.php']);
+        $redirectTarget = oauth_callback_redirect_after_login();
+        unset($_SESSION['home_login_redirect']);
+        oauth_callback_json(['success' => true, 'redirect' => $redirectTarget]);
     } catch (Throwable $e) {
         oauth_callback_json(['success' => false, 'message' => $e->getMessage()], 400);
     }
@@ -255,7 +262,9 @@ try {
         throw new RuntimeException('Provider chưa được hỗ trợ.');
     }
 
-    header('Location: index.php');
+    $redirectTarget = oauth_callback_redirect_after_login();
+    unset($_SESSION['home_login_redirect']);
+    header('Location: ' . $redirectTarget);
     exit;
 } catch (Throwable $e) {
     oauth_callback_redirect_error($e->getMessage());

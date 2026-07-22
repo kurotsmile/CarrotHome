@@ -4,7 +4,7 @@ if (!defined('CARROT_SITE_KEY')) {
     define('CARROT_SITE_KEY', 'CarrotHome');
 }
 if (!defined('CARROT_SITE_ALIASES')) {
-    define('CARROT_SITE_ALIASES', ['CarrotHome', 'Home', 'home.carrot28.com']);
+    define('CARROT_SITE_ALIASES', ['CarrotHome', 'Home', 'carrot28.com', 'home.carrot28.com']);
 }
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/includes/functions.php';
@@ -28,6 +28,8 @@ $allowed = ['google', 'github', 'twitter_x'];
 if (!in_array($provider, $allowed, true)) {
     social_login_error('Provider không hợp lệ.');
 }
+$redirectTarget = carrot_safe_redirect_target($_GET['redirect'] ?? ($_SESSION['home_login_redirect'] ?? ''), 'index.php');
+$_SESSION['home_login_redirect'] = $redirectTarget;
 
 if (!$pdo instanceof PDO) {
     social_login_error($db_error ?? 'Không thể kết nối database.');
@@ -41,6 +43,7 @@ if (!$config) {
 $state = bin2hex(random_bytes(16));
 $_SESSION['oauth_state'] = $state;
 $_SESSION['oauth_provider'] = $provider;
+$_SESSION['oauth_redirect_after_login'] = $redirectTarget;
 
 $callbackUrl = social_login_base_url() . '/oauth-callback.php';
 $projectUrl = rtrim(trim((string)($config['project_url'] ?? '')), '/');

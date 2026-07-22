@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://home.carrot28.com/sitemap.xml
+Sitemap: https://carrot28.com/sitemap.xml

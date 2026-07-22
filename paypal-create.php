@@ -69,7 +69,7 @@ if ($token_status >= 300 || empty($token_data['access_token'])) {
 }
 
 $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-$host = $_SERVER['HTTP_HOST'] ?? 'home.carrot28.com';
+$host = $_SERVER['HTTP_HOST'] ?? 'carrot28.com';
 $return_url = $scheme . '://' . $host . base_url('paypal-return.php?slug=' . urlencode($slug));
 $cancel_url = $scheme . '://' . $host . app_url($slug);
 
