@@ -99,8 +99,8 @@ if ($pdo) {
 }
 
 $page_title = $selected_category_id === ''
-    ? ui_label('meta.category_title', 'Category - CarrotHome')
-    : category_display_title($category_detail) . ' - CarrotHome';
+    ? ui_label('meta.category_title', 'Category - Carrot28')
+    : category_display_title($category_detail) . ' - Carrot28';
 $page_description = $selected_category_id === ''
     ? ui_label('meta.category_description', 'Browse app and game categories.')
     : (trim((string)($category_detail['description'] ?? '')) ?: $page_title);

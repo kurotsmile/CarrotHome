@@ -27,7 +27,7 @@ if ($pdo) {
     }
 }
 
-$page_title = ui_label('meta.stores_title', 'Our Stores - CarrotHome');
+$page_title = ui_label('meta.stores_title', 'Our Stores - Carrot28');
 $page_description = ui_label('meta.stores_description', 'Official stores and distribution channels for Carrot apps and games.');
 
 include __DIR__ . '/includes/header.php';

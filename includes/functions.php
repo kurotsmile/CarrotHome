@@ -432,6 +432,26 @@ function base_url($path = '') {
     return '/' . $path;
 }
 
+function carrot_home_public_base_url(): string
+{
+    $host = strtolower(trim((string) ($_SERVER['HTTP_HOST'] ?? '')));
+    $hostWithoutPort = preg_replace('/:\d+$/', '', $host);
+    $path = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '/')), '/');
+    $path = $path === '/' ? '' : $path;
+
+    if (in_array($hostWithoutPort, ['localhost', '127.0.0.1'], true)) {
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        return $scheme . '://' . ($host ?: 'localhost') . $path;
+    }
+
+    return 'https://carrot28.com' . $path;
+}
+
+function carrot_home_oauth_callback_url(): string
+{
+    return carrot_home_public_base_url() . '/oauth-callback.php';
+}
+
 function carrot_allowed_redirect_hosts(): array
 {
     $hosts = [
@@ -470,7 +490,13 @@ function carrot_safe_redirect_target(?string $target, string $fallback = 'index.
         }
         $host = strtolower((string) (parse_url($target, PHP_URL_HOST) ?: ''));
         $host = preg_replace('/:\d+$/', '', $host);
-        return in_array($host, carrot_allowed_redirect_hosts(), true) ? $target : $fallback;
+        if (!in_array($host, carrot_allowed_redirect_hosts(), true)) {
+            return $fallback;
+        }
+        if ($host === 'home.carrot28.com') {
+            return preg_replace('~^https?://home\.carrot28\.com(?=[:/?#]|$)~i', 'https://carrot28.com', $target) ?: $target;
+        }
+        return $target;
     }
 
     return $target;

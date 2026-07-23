@@ -11,10 +11,7 @@ require_once __DIR__ . '/includes/functions.php';
 
 function social_login_base_url(): string
 {
-    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-    $path = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '/')), '/');
-    return $scheme . '://' . $host . ($path === '' ? '' : $path);
+    return carrot_home_public_base_url();
 }
 
 function social_login_error(string $message): void
@@ -45,7 +42,7 @@ $_SESSION['oauth_state'] = $state;
 $_SESSION['oauth_provider'] = $provider;
 $_SESSION['oauth_redirect_after_login'] = $redirectTarget;
 
-$callbackUrl = social_login_base_url() . '/oauth-callback.php';
+$callbackUrl = carrot_home_oauth_callback_url();
 $projectUrl = rtrim(trim((string)($config['project_url'] ?? '')), '/');
 $apiKey = trim((string)($config['api_key'] ?? ''));
 

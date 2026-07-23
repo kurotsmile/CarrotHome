@@ -25,12 +25,16 @@ $app_content_html = '';
 $app_content_title = '';
 $app_categories = [];
 $app_view_count = 0;
+$app_rate_summary = ['average' => 0.0, 'count' => 0, 'distribution' => [5 => 0, 4 => 0, 3 => 0, 2 => 0, 1 => 0]];
+$app_user_rating = 0;
+$app_rate_message = '';
+$app_rate_success = false;
 $error_message = $db_error ?? '';
 $paypal_config = paypal_config_from_db($pdo ?? null, 'home');
 
 if (!$slug_candidates) {
     http_response_code(404);
-    $page_title = ui_label('meta.app_not_found_title', 'App not found - CarrotHome');
+    $page_title = ui_label('meta.app_not_found_title', 'App not found - Carrot28');
     $page_description = ui_label('meta.app_not_found_description', 'The requested app was not found.');
     include 'includes/header.php';
     echo '<div class="empty-state"><strong>' . h(ui_label('error.app_not_found', 'Không tìm thấy app.')) . '</strong><br>' . h(ui_label('error.missing_slug', 'Thiếu tham số slug.')) . '</div>';
@@ -174,7 +178,7 @@ if ($pdo) {
 
 if (!$app && !$error_message) {
     http_response_code(404);
-    $page_title = ui_label('meta.app_not_found_title', 'App not found - CarrotHome');
+    $page_title = ui_label('meta.app_not_found_title', 'App not found - Carrot28');
     $page_description = ui_label('meta.app_not_found_description', 'The requested app was not found.');
     include 'includes/header.php';
     echo '<div class="empty-state"><strong>' . h(ui_label('error.app_not_found_colon', 'Không tìm thấy app:')) . '</strong><br>' . h($slug) . '</div>';
@@ -184,7 +188,7 @@ if (!$app && !$error_message) {
 
 if ($error_message) {
     http_response_code(500);
-    $page_title = ui_label('meta.database_error_title', 'Database error - CarrotHome');
+    $page_title = ui_label('meta.database_error_title', 'Database error - Carrot28');
     $page_description = ui_label('meta.database_error_description', 'Database connection error.');
     include 'includes/header.php';
     echo '<div class="empty-state"><strong>' . h(ui_label('error.mysql', 'Lỗi MySQL:')) . '</strong><br>' . h($error_message) . '</div>';
@@ -197,7 +201,26 @@ $app_name = app_display_title($app);
 if ($app_name === '') {
     $app_name = $app_id;
 }
-$page_title = $app_name . ' - CarrotHome';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['app_rate_action'] ?? '') === 'rate_app') {
+    $rating = (int) ($_POST['rating'] ?? 0);
+    if ($rating < 1 || $rating > 5) {
+        $app_rate_message = ui_label('rate.error_required', 'Vui lòng chọn số sao để đánh giá.');
+    } else {
+        $rateResult = app_rate_submit($pdo ?? null, $app_id, $rating, (string) ($_POST['review_text'] ?? ''));
+        $app_rate_message = (string) ($rateResult['message'] ?? '');
+        $app_rate_success = !empty($rateResult['success']);
+        if ($app_rate_success) {
+            header('Location: ' . app_url($app_id) . '?rated=1#app-rate');
+            exit;
+        }
+    }
+} elseif (!empty($_GET['rated'])) {
+    $app_rate_message = ui_label('rate.success', 'Cảm ơn bạn đã đánh giá.');
+    $app_rate_success = true;
+}
+$app_rate_summary = app_rate_summary($pdo ?? null, $app_id);
+$app_user_rating = app_user_rate($pdo ?? null, $app_id);
+$page_title = $app_name . ' - Carrot28';
 $page_description = 'Download ' . $app_name . ' for Android, Windows, macOS, Linux and other platforms.';
 
 $downloads = app_download_links($app);
@@ -274,6 +297,50 @@ include 'includes/header.php';
           <?= $app_content_html !== '' ? $app_content_html : nl2br(h($app['decription'])) ?>
         </div>
       <?php endif; ?>
+
+      <section class="app-rate-section" id="app-rate" aria-labelledby="app-rate-heading">
+        <div class="app-rate-summary">
+          <p class="eyebrow"><?= h(ui_label('rate', 'Rate')) ?></p>
+          <h3 id="app-rate-heading"><?= h(ui_label('rate.title', 'Ratings and reviews')) ?></h3>
+          <div class="app-rate-score">
+            <strong><?= h(number_format((float) $app_rate_summary['average'], 1)) ?></strong>
+            <span class="app-rate-score__stars" aria-label="<?= h(number_format((float) $app_rate_summary['average'], 1)) ?> / 5">
+              <?php for ($star = 1; $star <= 5; $star++): ?>
+                <span class="<?= $star <= round((float) $app_rate_summary['average']) ? 'is-filled' : '' ?>">★</span>
+              <?php endfor; ?>
+            </span>
+            <small><?= h(number_format((int) $app_rate_summary['count'])) ?> <?= h(ui_label('rate.count', 'ratings')) ?></small>
+          </div>
+          <div class="app-rate-bars" aria-hidden="true">
+            <?php foreach ([5, 4, 3, 2, 1] as $star): ?>
+              <?php
+                $starTotal = (int) (($app_rate_summary['distribution'][$star] ?? 0));
+                $percent = (int) $app_rate_summary['count'] > 0 ? min(100, round(($starTotal / (int) $app_rate_summary['count']) * 100)) : 0;
+              ?>
+              <div class="app-rate-bar">
+                <span><?= $star ?></span>
+                <div><i style="width:<?= (int) $percent ?>%"></i></div>
+              </div>
+            <?php endforeach; ?>
+          </div>
+        </div>
+
+        <form class="app-rate-form" method="post" action="<?= h(app_url($app_id)) ?>#app-rate">
+          <input type="hidden" name="app_rate_action" value="rate_app">
+          <h3><?= h(ui_label('rate.your_rate', 'Rate this app')) ?></h3>
+          <div class="rate-stars" aria-label="<?= h(ui_label('rate.choose_stars', 'Choose stars')) ?>">
+            <?php for ($star = 5; $star >= 1; $star--): ?>
+              <input id="app_rate_<?= $star ?>" name="rating" type="radio" value="<?= $star ?>" <?= $app_user_rating === $star ? 'checked' : '' ?>>
+              <label for="app_rate_<?= $star ?>" title="<?= $star ?>/5">★</label>
+            <?php endfor; ?>
+          </div>
+          <textarea name="review_text" maxlength="1000" placeholder="<?= h(ui_label('rate.placeholder', 'Share a short review')) ?>"></textarea>
+          <?php if ($app_rate_message !== ''): ?>
+            <div class="login-alert <?= $app_rate_success ? 'login-alert--success' : 'login-alert--error' ?>"><?= h($app_rate_message) ?></div>
+          <?php endif; ?>
+          <button class="store-action app-rate-submit" type="submit"><?= h(ui_label('rate.submit', 'Submit rating')) ?></button>
+        </form>
+      </section>
 
       <?php if (count($videos)): ?>
         <h3>Video</h3>

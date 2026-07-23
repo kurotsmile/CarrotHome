@@ -198,7 +198,7 @@ if ($pdo) {
     }
 }
 
-$page_title = ui_label('meta.home_title', 'CarrotHome - App And Game');
+$page_title = ui_label('meta.home_title', 'Carrot28 - App And Game');
 $page_description = ui_label('meta.home_description', 'Store Carrot style app and game catalog loaded from PHP and MySQL.');
 include __DIR__ . '/includes/header.php';
 ?>

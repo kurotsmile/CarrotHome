@@ -35,8 +35,8 @@ if ($pdo instanceof PDO) {
     }
 }
 
-$page_title = ui_label('order.title', 'Orders') . ' - CarrotHome';
-$page_description = ui_label('order.description', 'Your CarrotHome orders.');
+$page_title = ui_label('order.title', 'Orders') . ' - Carrot28';
+$page_description = ui_label('order.description', 'Your Carrot28 orders.');
 include __DIR__ . '/includes/header.php';
 ?>
 

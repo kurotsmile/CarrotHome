@@ -54,7 +54,7 @@ $footer_page_columns = [
 <footer class="site-footer">
   <div class="container footer-inner">
     <div class="footer-brand">
-      <a class="footer-logo" href="<?= h(base_url('index.php')) ?>"><img class="brand-logo-img" src="<?= h(base_url('images/carrot_28.png')) ?>" alt="CarrotHome"></a>
+      <a class="footer-logo" href="<?= h(base_url('index.php')) ?>"><img class="brand-logo-img" src="<?= h(base_url('images/carrot_28.png')) ?>" alt="Carrot28"></a>
       <p><?= h(ui_label('footer.description', 'Kho app và game được sắp xếp gọn gàng, dễ tìm, dễ tải cho nhiều nền tảng.')) ?></p>
     </div>
 
@@ -174,7 +174,7 @@ document.addEventListener('DOMContentLoaded', function () {
   if (mailButton) {
     mailButton.addEventListener('click', function () {
       var shareUrl = currentUrl();
-      var subject = encodeURIComponent(document.title || 'CarrotHome');
+      var subject = encodeURIComponent(document.title || 'Carrot28');
       var body = encodeURIComponent(shareUrl);
       window.location.href = 'mailto:?subject=' + subject + '&body=' + body;
     });

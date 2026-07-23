@@ -55,8 +55,8 @@ if (!$pdo instanceof PDO) {
     }
 }
 
-$page_title = ui_label('profile.title', 'Profile') . ' - CarrotHome';
-$page_description = ui_label('profile.description', 'View and update your CarrotHome profile.');
+$page_title = ui_label('profile.title', 'Profile') . ' - Carrot28';
+$page_description = ui_label('profile.description', 'View and update your Carrot28 profile.');
 include __DIR__ . '/includes/header.php';
 ?>
 

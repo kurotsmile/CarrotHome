@@ -3,7 +3,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-$page_title = $page_title ?? 'CarrotHome';
+$page_title = $page_title ?? 'Carrot28';
 $page_description = $page_description ?? 'Download apps and games';
 $style_version = file_exists(__DIR__ . '/../styles.css') ? filemtime(__DIR__ . '/../styles.css') : time();
 $header_search = trim($_GET['q'] ?? '');
@@ -88,6 +88,7 @@ $current_key_lang = $current_country['lang_key'] ?? ($current_key_lang ?: 'en');
 <link rel="icon" href="<?= h(base_url('favicon/favicon.ico')) ?>" sizes="any">
 <link rel="manifest" href="<?= h(base_url('favicon/site.webmanifest')) ?>">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <?= $extra_head ?? '' ?>
 <link rel="stylesheet" href="<?= h(base_url('styles.css')) ?>?v=<?= $style_version ?>">
 </head>
@@ -95,7 +96,7 @@ $current_key_lang = $current_country['lang_key'] ?? ($current_key_lang ?: 'en');
 <header class="site-nav">
   <div class="site-nav__wrapper">
     <a class="site-nav__logo" href="<?= h(base_url('index.php')) ?>" aria-label="<?= h(ui_label('aria.back_home', 'Back to home page')) ?>">
-      <img class="brand-logo-img" src="<?= h(base_url('images/carrot_28.png')) ?>" alt="CarrotHome">
+      <img class="brand-logo-img" src="<?= h(base_url('images/carrot_28.png')) ?>" alt="Carrot28">
     </a>
     <form class="header-search" method="get" action="<?= h(base_url('index.php')) ?>" aria-label="<?= h(ui_label('aria.search_apps_games', 'Search apps and games')) ?>">
       <input name="q" type="search" placeholder="<?= h(ui_label('search.placeholder', 'Search apps and games')) ?>" value="<?= h($header_search) ?>">
@@ -147,7 +148,7 @@ $current_key_lang = $current_country['lang_key'] ?? ($current_key_lang ?: 'en');
           </div>
         </div>
       <?php else: ?>
-        <a class="login-button" href="login.php"><?= h(ui_label('nav.login', 'Login')) ?></a>
+        <button class="login-button js-home-login" type="button"><?= h(ui_label('nav.login', 'Login')) ?></button>
       <?php endif; ?>
     </nav>
   </div>
@@ -156,6 +157,108 @@ $current_key_lang = $current_country['lang_key'] ?? ($current_key_lang ?: 'en');
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+  function homeLoginUrl(mode) {
+    var redirect = window.location.href;
+    var query = mode === 'register'
+      ? {mode: 'register', redirect: redirect}
+      : {redirect: redirect};
+    return '<?= h(base_url('login.php')) ?>?' + new URLSearchParams(query).toString();
+  }
+
+  function homeSocialUrl(provider) {
+    return '<?= h(base_url('social-login.php')) ?>?' + new URLSearchParams({
+      provider: provider,
+      redirect: window.location.href
+    }).toString();
+  }
+
+  function homeLoginPanel(mode) {
+    var isRegister = mode === 'register';
+    return '' +
+      '<section class="login-panel home-login-panel" aria-label="<?= h(ui_label('login.title', 'Login')) ?>">' +
+        '<a class="login-logo" href="<?= h(base_url('index.php')) ?>" aria-label="<?= h(ui_label('aria.back_home', 'Back to home page')) ?>">' +
+          '<img src="<?= h(base_url('images/carrot_28.png')) ?>" alt="Carrot28">' +
+        '</a>' +
+        '<div class="login-tabs" role="tablist" aria-label="<?= h(ui_label('login.tabs', 'Account access')) ?>">' +
+          '<button class="' + (!isRegister ? 'is-active' : '') + '" type="button" data-home-login-mode="login"><?= h(ui_label('nav.login', 'Login')) ?></button>' +
+          '<button class="' + (isRegister ? 'is-active' : '') + '" type="button" data-home-login-mode="register"><?= h(ui_label('nav.register', 'Register')) ?></button>' +
+        '</div>' +
+        '<form class="login-form ' + (isRegister ? 'is-register-mode' : '') + '" method="post" action="<?= h(base_url('login.php')) ?>">' +
+          '<input type="hidden" name="mode" value="' + (isRegister ? 'register' : 'login') + '">' +
+          '<input type="hidden" name="redirect" value="' + homeEscapeHtml(window.location.href) + '">' +
+          '<h1>' + (isRegister ? '<?= h(ui_label('nav.register', 'Register')) ?>' : '<?= h(ui_label('nav.login', 'Login')) ?>') + '</h1>' +
+          '<p>' + (isRegister ? '<?= h(ui_label('register.intro', 'Create your Carrot28 account.')) ?>' : '<?= h(ui_label('login.intro', 'Sign in to your Carrot28 account.')) ?>') + '</p>' +
+          '<div class="social-auth-grid">' +
+            '<a class="social-auth-button" href="' + homeSocialUrl('google') + '" aria-label="Google"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285f4" d="M21.6 12.2c0-.7-.1-1.3-.2-1.8H12v3.5h5.4c-.2 1.1-.9 2.1-1.9 2.7v2.2h3c1.8-1.6 3.1-3.9 3.1-6.6Z"/><path fill="#34a853" d="M12 22c2.7 0 5-0.9 6.6-2.5l-3-2.2c-.8.5-1.9.9-3.6.9-2.6 0-4.8-1.7-5.6-4.1H3.3v2.3C4.9 19.7 8.2 22 12 22Z"/><path fill="#fbbc05" d="M6.4 14.1c-.2-.6-.3-1.3-.3-2.1s.1-1.4.3-2.1V7.6H3.3C2.5 8.9 2.1 10.4 2.1 12s.4 3.1 1.2 4.4l3.1-2.3Z"/><path fill="#ea4335" d="M12 5.8c1.5 0 2.8.5 3.8 1.5l2.8-2.8C17 2.9 14.7 2 12 2 8.2 2 4.9 4.3 3.3 7.6l3.1 2.3c.8-2.4 3-4.1 5.6-4.1Z"/></svg><span>Google</span></a>' +
+            '<a class="social-auth-button" href="' + homeSocialUrl('twitter_x') + '" aria-label="X"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M18.3 2.8h3.3l-7.2 8.2 8.5 10.2h-6.6l-5.2-6.2-6 6.2H1.8l7.7-8.7L1.4 2.8h6.8l4.7 5.7 5.4-5.7Zm-1.2 16.6h1.8L7.2 4.5H5.3l11.8 14.9Z"/></svg><span>X</span></a>' +
+            '<a class="social-auth-button" href="' + homeSocialUrl('github') + '" aria-label="GitHub"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-3.2 19.5c.5.1.7-.2.7-.5v-1.8c-2.9.6-3.5-1.2-3.5-1.2-.5-1.1-1.1-1.4-1.1-1.4-.9-.6.1-.6.1-.6 1 0 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8.1-.6.3-1.1.6-1.3-2.3-.3-4.7-1.1-4.7-5A3.9 3.9 0 0 1 6.4 8.7c-.1-.3-.5-1.3.1-2.7 0 0 .8-.3 2.8 1a9.6 9.6 0 0 1 5.2 0c2-1.3 2.8-1 2.8-1 .6 1.4.2 2.4.1 2.7a3.9 3.9 0 0 1 1.1 2.8c0 3.9-2.4 4.7-4.7 5 .4.3.7.9.7 1.8V21c0 .3.2.6.7.5A10 10 0 0 0 12 2Z"/></svg><span>GitHub</span></a>' +
+          '</div>' +
+          (isRegister ? '<button class="login-secondary js-register-form-toggle" type="button"><?= h(ui_label('register.with_form', 'Đăng ký bằng form')) ?></button><div class="register-form-fields"><label for="popup_register_name"><?= h(ui_label('label.name', 'Name')) ?></label><input id="popup_register_name" name="name" autocomplete="name" disabled>' : '') +
+          '<label for="popup_login_email"><?= h(ui_label('label.email', 'Email')) ?></label>' +
+          '<input id="popup_login_email" name="email" type="email" autocomplete="email" required autofocus ' + (isRegister ? 'disabled' : '') + '>' +
+          '<label for="popup_login_password"><?= h(ui_label('label.password', 'Password')) ?></label>' +
+          '<input id="popup_login_password" name="password" type="password" autocomplete="' + (isRegister ? 'new-password' : 'current-password') + '" required ' + (isRegister ? 'disabled' : '') + '>' +
+          (isRegister ? '<label for="popup_register_password_confirm"><?= h(ui_label('label.password_confirm', 'Confirm password')) ?></label><input id="popup_register_password_confirm" name="password_confirm" type="password" autocomplete="new-password" required disabled></div>' : '') +
+          '<button class="login-submit" type="submit">' + (isRegister ? '<?= h(ui_label('nav.register', 'Register')) ?>' : '<?= h(ui_label('nav.login', 'Login')) ?>') + '</button>' +
+        '</form>' +
+      '</section>';
+  }
+
+  function openHomeLogin(mode) {
+    if (!window.Swal) {
+      window.location.href = homeLoginUrl(mode || 'login');
+      return;
+    }
+
+    Swal.fire({
+      html: homeLoginPanel(mode || 'login'),
+      showConfirmButton: false,
+      showCloseButton: true,
+      customClass: {popup: 'home-login-swal'},
+      background: 'transparent',
+      width: 'min(100% - 28px, 470px)',
+      padding: 0,
+      didOpen: function (popup) {
+        var firstInput = popup.querySelector('input:not([type="hidden"]):not(:disabled)');
+        if (firstInput) firstInput.focus();
+      }
+    });
+  }
+
+  function homeEscapeHtml(value) {
+    return String(value || '').replace(/[&<>"']/g, function (char) {
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[char];
+    });
+  }
+
+  document.addEventListener('click', function (event) {
+    var loginButton = event.target.closest('.js-home-login');
+    if (loginButton) {
+      event.preventDefault();
+      openHomeLogin('login');
+      return;
+    }
+
+    var modeButton = event.target.closest('[data-home-login-mode]');
+    if (modeButton) {
+      event.preventDefault();
+      openHomeLogin(modeButton.getAttribute('data-home-login-mode') || 'login');
+      return;
+    }
+
+    var registerToggle = event.target.closest('.home-login-panel .js-register-form-toggle');
+    if (registerToggle) {
+      var fields = document.querySelector('.home-login-panel .register-form-fields');
+      if (!fields) return;
+      fields.classList.toggle('is-open');
+      fields.querySelectorAll('input, select, textarea').forEach(function (input) {
+        input.disabled = !fields.classList.contains('is-open');
+      });
+      var input = fields.querySelector('input:not(:disabled)');
+      if (input) input.focus();
+    }
+  });
+
   var authHash = new URLSearchParams((window.location.hash || '').replace(/^#/, ''));
   var accessToken = authHash.get('access_token');
   if (accessToken) {

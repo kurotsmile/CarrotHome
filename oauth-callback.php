@@ -215,7 +215,7 @@ try {
 
     $clientId = (string)($_SESSION['oauth_client_id'] ?? '');
     $clientSecret = (string)($_SESSION['oauth_client_secret'] ?? '');
-    $redirectUri = ((empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off') ? 'http' : 'https') . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '/')), '/') . '/oauth-callback.php';
+    $redirectUri = carrot_home_oauth_callback_url();
 
     if ($provider === 'github') {
         $token = oauth_callback_request('https://github.com/login/oauth/access_token', [

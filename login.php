@@ -66,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $email,
                 current_lang_key(),
                 $name,
-                password_hash($password, PASSWORD_DEFAULT),
+                $password,
                 'user',
                 'private',
                 'normal',
@@ -100,8 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $password_ok = false;
 
             if ($user && $stored_password !== '') {
-                $info = password_get_info($stored_password);
-                $password_ok = $info['algo'] !== 0 ? password_verify($password, $stored_password) : hash_equals($stored_password, $password);
+                $password_ok = hash_equals($stored_password, $password);
             }
 
             if (!$user || !$password_ok) {
@@ -132,7 +131,7 @@ $register_form_open = $mode === 'register' && $_SERVER['REQUEST_METHOD'] === 'PO
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title><?= h(ui_label('login.title', 'Login')) ?> - CarrotHome</title>
+<title><?= h(ui_label('login.title', 'Login')) ?> - Carrot28</title>
 <meta name="theme-color" content="#ff5900">
 <link rel="apple-touch-icon" sizes="180x180" href="<?= h(base_url('favicon/apple-touch-icon.png')) ?>">
 <link rel="icon" type="image/png" sizes="32x32" href="<?= h(base_url('favicon/favicon-32x32.png')) ?>">
@@ -145,7 +144,7 @@ $register_form_open = $mode === 'register' && $_SERVER['REQUEST_METHOD'] === 'PO
 <main class="login-page">
   <section class="login-panel" aria-label="<?= h(ui_label('login.title', 'Login')) ?>">
     <a class="login-logo" href="<?= h(base_url('index.php')) ?>" aria-label="<?= h(ui_label('aria.back_home', 'Back to home page')) ?>">
-      <img src="<?= h(base_url('images/carrot_28.png')) ?>" alt="CarrotHome">
+      <img src="<?= h(base_url('images/carrot_28.png')) ?>" alt="Carrot28">
     </a>
 
     <?php if (!empty($_SESSION['home_user_id'])): ?>
@@ -167,7 +166,7 @@ $register_form_open = $mode === 'register' && $_SERVER['REQUEST_METHOD'] === 'PO
         <input type="hidden" name="mode" value="<?= h($mode) ?>">
         <input type="hidden" name="redirect" value="<?= h($redirect_target) ?>">
         <h1><?= h($mode === 'register' ? ui_label('nav.register', 'Register') : ui_label('nav.login', 'Login')) ?></h1>
-        <p><?= h($mode === 'register' ? ui_label('register.intro', 'Create your CarrotHome account.') : ui_label('login.intro', 'Sign in to your CarrotHome account.')) ?></p>
+        <p><?= h($mode === 'register' ? ui_label('register.intro', 'Create your Carrot28 account.') : ui_label('login.intro', 'Sign in to your Carrot28 account.')) ?></p>
 
         <?php if ($error_message): ?>
           <div class="login-alert login-alert--error"><?= h($error_message) ?></div>

@@ -212,3 +212,122 @@ function app_view_count(?PDO $pdo, string $app_id): int
         return 0;
     }
 }
+
+function app_rate_key(): string
+{
+    $userId = (int) ($_SESSION['home_user_id'] ?? 0);
+    if ($userId > 0) {
+        return 'user:' . $userId;
+    }
+
+    $ip = visit_client_ip();
+    $agent = substr((string) ($_SERVER['HTTP_USER_AGENT'] ?? ''), 0, 512);
+    return 'guest:' . sha1($ip . '|' . $agent);
+}
+
+function app_rate_submit(?PDO $pdo, string $app_id, int $rating, string $review_text = ''): array
+{
+    $app_id = trim($app_id);
+    $rating = max(1, min(5, $rating));
+    if (!$pdo instanceof PDO || $app_id === '') {
+        return ['success' => false, 'message' => 'Không thể lưu đánh giá lúc này.'];
+    }
+
+    try {
+        $ip = visit_client_ip();
+        $rateKey = app_rate_key();
+        $userId = !empty($_SESSION['home_user_id']) ? (int) $_SESSION['home_user_id'] : null;
+        $review_text = trim($review_text);
+        $stmt = $pdo->prepare("
+            INSERT INTO app_rate (
+              app_id, user_id, rate_key, rating, review_text, lang, ip_address, ip_text, user_agent, status
+            )
+            VALUES (
+              :app_id, :user_id, :rate_key, :rating, :review_text, :lang,
+              INET6_ATON(NULLIF(:ip, '')),
+              :ip_text, :user_agent, 'active'
+            )
+            ON DUPLICATE KEY UPDATE
+              user_id = VALUES(user_id),
+              rating = VALUES(rating),
+              review_text = VALUES(review_text),
+              lang = VALUES(lang),
+              ip_address = VALUES(ip_address),
+              ip_text = VALUES(ip_text),
+              user_agent = VALUES(user_agent),
+              status = 'active',
+              updated_at = CURRENT_TIMESTAMP
+        ");
+        $stmt->execute([
+            ':app_id' => $app_id,
+            ':user_id' => $userId,
+            ':rate_key' => $rateKey,
+            ':rating' => $rating,
+            ':review_text' => $review_text !== '' ? $review_text : null,
+            ':lang' => function_exists('current_lang_key') ? current_lang_key() : null,
+            ':ip' => $ip,
+            ':ip_text' => $ip !== '' ? $ip : null,
+            ':user_agent' => substr((string) ($_SERVER['HTTP_USER_AGENT'] ?? ''), 0, 512) ?: null,
+        ]);
+        return ['success' => true, 'message' => 'Cảm ơn bạn đã đánh giá.'];
+    } catch (Throwable $e) {
+        error_log('app_rate_submit failed: ' . $e->getMessage());
+        return ['success' => false, 'message' => 'Không thể lưu đánh giá lúc này.'];
+    }
+}
+
+function app_rate_summary(?PDO $pdo, string $app_id): array
+{
+    $empty = [
+        'average' => 0.0,
+        'count' => 0,
+        'distribution' => [5 => 0, 4 => 0, 3 => 0, 2 => 0, 1 => 0],
+    ];
+    $app_id = trim($app_id);
+    if (!$pdo instanceof PDO || $app_id === '') {
+        return $empty;
+    }
+
+    try {
+        $stmt = $pdo->prepare("SELECT rating, COUNT(*) AS total FROM app_rate WHERE app_id = :app_id AND status = 'active' GROUP BY rating");
+        $stmt->execute([':app_id' => $app_id]);
+        $count = 0;
+        $sum = 0;
+        $distribution = $empty['distribution'];
+        foreach ($stmt->fetchAll() as $row) {
+            $rating = max(1, min(5, (int) ($row['rating'] ?? 0)));
+            $total = (int) ($row['total'] ?? 0);
+            $distribution[$rating] = $total;
+            $count += $total;
+            $sum += $rating * $total;
+        }
+        return [
+            'average' => $count > 0 ? round($sum / $count, 1) : 0.0,
+            'count' => $count,
+            'distribution' => $distribution,
+        ];
+    } catch (Throwable $e) {
+        error_log('app_rate_summary failed: ' . $e->getMessage());
+        return $empty;
+    }
+}
+
+function app_user_rate(?PDO $pdo, string $app_id): int
+{
+    $app_id = trim($app_id);
+    if (!$pdo instanceof PDO || $app_id === '') {
+        return 0;
+    }
+
+    try {
+        $stmt = $pdo->prepare("SELECT rating FROM app_rate WHERE app_id = :app_id AND rate_key = :rate_key AND status = 'active' LIMIT 1");
+        $stmt->execute([
+            ':app_id' => $app_id,
+            ':rate_key' => app_rate_key(),
+        ]);
+        return (int) $stmt->fetchColumn();
+    } catch (Throwable $e) {
+        error_log('app_user_rate failed: ' . $e->getMessage());
+        return 0;
+    }
+}

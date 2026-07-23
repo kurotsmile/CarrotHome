@@ -152,8 +152,8 @@ if ($orderId === '') {
 $appTitle = trim((string)($order['app_title'] ?? '')) ?: trim((string)($order['app_id'] ?? $slug));
 $githubUrl = trim((string)($order['github'] ?? ''));
 $isCompleted = (($order['status'] ?? '') === 'COMPLETED');
-$page_title = ($appTitle !== '' ? $appTitle . ' - ' : '') . 'PayPal Order - CarrotHome';
-$page_description = 'PayPal order result for CarrotHome app source purchase.';
+$page_title = ($appTitle !== '' ? $appTitle . ' - ' : '') . 'PayPal Order - Carrot28';
+$page_description = 'PayPal order result for Carrot28 app source purchase.';
 $extra_head = '<style>
 .paypal-result{width:min(100% - 32px,980px);margin:44px auto 72px}
 .paypal-result-card{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:28px;align-items:stretch;padding:28px;border:1px solid var(--line);border-radius:8px;background:#fff;box-shadow:0 18px 48px rgba(20,20,24,.08)}
